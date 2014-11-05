@@ -1,12 +1,17 @@
+# Ignore .o files
+*.o
+
+# Ignore .class files
 *.class
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+# Ignore temporary files
+*~
 
-# Package Files #
-*.jar
-*.war
-*.ear
+# Ignore log files
+*.log
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+# Ignore the build and jars directories
+build/
+jars/
+jars-instrumented/
+/bin
