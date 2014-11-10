@@ -80,6 +80,7 @@ public final class LaunchSampleAgents {
 
     private static void connect(ComponentLauncher launcher, int fb, int pf, int at, Config config) throws InterruptedException, ConnectionException {
         int i = 0;
+        int connectedAgents = 0;
         try {
             while (fb-- != 0) {
                 Logger.info("Connecting fire brigade " + (i++) + "...");
