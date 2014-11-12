@@ -1,7 +1,9 @@
 package exploration;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import rescuecore.objects.World;
@@ -29,6 +31,7 @@ public class Partitioning {
        		StandardEntityURN.GAS_STATION,
        		StandardEntityURN.BUILDING);		
 	}
+	
 	
 	public List<List<EntityID>> getAgentAssigment() {
 		//Get all agents that can be assigned
@@ -68,6 +71,63 @@ public class Partitioning {
 		System.out.println("matrix created!");
 		
 		return null;
+	}
+	
+	private Map<EntityID, EntityID> hungarianAlgorithm(List<List<Integer>> distanceMatrix) {
+		Map<EntityID, EntityID> assignment = new HashMap<EntityID, EntityID>();
+		
+		for(int i=0; i<distanceMatrix.size(); i++) {
+			distanceMatrix.set(i, subtractLowest(distanceMatrix.get(i)));
+		}
+		
+		if(matrixDone(distanceMatrix)) {
+			//Create the hashmap
+		}
+		
+		return null;
+	}
+	
+	private List<Integer> subtractLowest(List<Integer> matrixRow) {
+		int lowestVal = Integer.MAX_VALUE;
+		for(int i=0; i<matrixRow.size(); i++) {
+			if(matrixRow.get(i) < lowestVal) {
+				lowestVal = matrixRow.get(i);
+			}
+		}
+		for(int i=0; i<matrixRow.size(); i++) {
+			matrixRow.set(i, matrixRow.get(i)-lowestVal);
+		}
+		return matrixRow;
+	}
+	
+	private boolean matrixDone(List<List<Integer>> matrix) {
+		//Check rows
+		for(List<Integer> row : matrix) {
+			int zeroCount = 0;
+			for(int i=0; i<row.size(); i++) {
+				if (row.get(i) == 0) {
+					zeroCount++;
+				}
+			}
+			if (zeroCount != 1) {
+				return false;
+			}
+		}
+		
+		//Check columns
+		for(int i=0; i<matrix.get(0).size(); i++) {
+			int zeroCount = 0;
+			for(int z=0; z<matrix.size(); z++) {
+				if (matrix.get(z).get(i) == 0) {
+					zeroCount++;
+				}
+			}
+			if (zeroCount != 1) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	
