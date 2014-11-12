@@ -1,56 +1,105 @@
 package exploration;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
 
-import rescuecore2.messages.Command;
+import rescuecore.objects.World;
 import rescuecore2.misc.Pair;
-import rescuecore2.standard.components.StandardAgent;
-import rescuecore2.standard.entities.Building;
+import rescuecore2.standard.entities.Human;
 import rescuecore2.standard.entities.StandardEntity;
 import rescuecore2.standard.entities.StandardEntityURN;
-import rescuecore2.worldmodel.ChangeSet;
+import rescuecore2.standard.entities.StandardWorldModel;
 import rescuecore2.worldmodel.EntityID;
+import rescuecore2.worldmodel.WorldModel;
 
-public class ExplorationCentre extends StandardAgent<Building>{
-	private List<EntityID> agents;
-	private static boolean first = true;
-	public List<List<EntityID>> clusters;
+public class Partitioning {
+	private StandardWorldModel model;
+	private List<Tuple<Integer,Integer>> clusterCenters;
+	private List<List<EntityID>> clusters;
 	
-	@Override
-    protected void postConnect() {
-            super.postConnect();
-            model.indexClass(StandardEntityURN.CIVILIAN, 
-            		StandardEntityURN.FIRE_BRIGADE,
-            		StandardEntityURN.POLICE_FORCE, 
-            		StandardEntityURN.AMBULANCE_TEAM, 
-            		StandardEntityURN.REFUGE, 
-            		StandardEntityURN.HYDRANT,
-            		StandardEntityURN.GAS_STATION,
-            		StandardEntityURN.BUILDING);
-            System.out.println("myID = "+this.getID());
-            agents = new ArrayList<EntityID>();
-            for (StandardEntity entity : 
-            	model.getEntitiesOfType(StandardEntityURN.POLICE_FORCE, 
-            			StandardEntityURN.FIRE_BRIGADE,
-						StandardEntityURN.AMBULANCE_TEAM)) {
-            	agents.add(entity.getID());
-            }
-            
-            if (first) {
-            	first = false;
-            	for (EntityID id : agents) {
-	            	System.out.println((model.getEntity(id)).getLocation(model));
-	            }
-            }
-            //clusters = getClusters(agents, 4);
-    }
+	public Partitioning(StandardWorldModel model) {
+		this.model = model;
+		this.model.indexClass(StandardEntityURN.CIVILIAN, 
+       		StandardEntityURN.FIRE_BRIGADE,
+       		StandardEntityURN.POLICE_FORCE, 
+       		StandardEntityURN.AMBULANCE_TEAM, 
+       		StandardEntityURN.REFUGE, 
+       		StandardEntityURN.HYDRANT,
+       		StandardEntityURN.GAS_STATION,
+       		StandardEntityURN.BUILDING);		
+	}
 	
-	private List<List<EntityID>> getClusters(List<EntityID> entities, int numClusters) {
-		List<Tuple<Integer,Integer>> clusterCenters = new ArrayList<Tuple<Integer,Integer>>();
+	public List<List<EntityID>> getAgentAssigment() {
+		//Get all agents that can be assigned
+		List<EntityID> agents = new ArrayList<EntityID>();
+		for(StandardEntity entity : this.model.getEntitiesOfType(StandardEntityURN.FIRE_BRIGADE,
+	       		StandardEntityURN.POLICE_FORCE, 
+	       		StandardEntityURN.AMBULANCE_TEAM)) {
+			Human h = (Human)entity;
+			
+			//Buried agents can't move, ignore them
+			if(h.getBuriedness() == 0) {
+				agents.add(entity.getID());
+			}
+		}
+		
+		//Create the distance-matrix
+		List<List<Integer>> distanceMatrix = new ArrayList<List<Integer>>();
+		for(int i=0; i<agents.size(); i++) {
+			distanceMatrix.add(new ArrayList<Integer>());
+		}
+		
+		System.out.println("Creating matrix");
+		//agents x clusterCenters
+		for(int i=0; i<agents.size(); i++) {
+			System.out.print(String.format("%1$12s","Agent #"+i+" |"));
+			Pair<Integer, Integer> agentPos = model.getEntity(agents.get(i)).getLocation(model);
+			for(Tuple<Integer, Integer> clusterCenter : clusterCenters) {
+				int distance = eclideanDistance(agentPos.first(), agentPos.second(),
+												clusterCenter.first, clusterCenter.second);
+				
+				distanceMatrix.get(i).add(distance);
+				System.out.print(String.format("%1$9s", distance+"|"));
+			}
+			System.out.println();
+		}
+		
+		System.out.println("matrix created!");
+		
+		return null;
+	}
+	
+	
+	private int getNumClusters() {
+		int numActiveAgents = 0;
+		for(StandardEntity entity : this.model.getEntitiesOfType(StandardEntityURN.FIRE_BRIGADE,
+       		StandardEntityURN.POLICE_FORCE, 
+       		StandardEntityURN.AMBULANCE_TEAM)) {
+			Human h = (Human)entity;
+			if(h.getBuriedness() == 0) {
+				numActiveAgents++;
+			}
+		}
+		
+		return numActiveAgents;
+	}
+	
+	private List<EntityID> getBuildingEntities() {
+		List<EntityID> agents = new ArrayList<EntityID>();
+		for (StandardEntity entity : 
+	       	this.model.getEntitiesOfType(/*StandardEntityURN.POLICE_FORCE, 
+	       			StandardEntityURN.FIRE_BRIGADE,
+						StandardEntityURN.AMBULANCE_TEAM*/StandardEntityURN.BUILDING)) {
+				agents.add(entity.getID());
+			}
+		return agents;
+	}
+	
+	public List<List<EntityID>> getClustersKMeans() {
+		int numClusters = getNumClusters();
+		List<EntityID> entities = getBuildingEntities();
+		clusterCenters = new ArrayList<Tuple<Integer,Integer>>();
 		
 		//Create random position centers for each cluster
 		int maxX = 409164; //Change these constants later
@@ -71,7 +120,6 @@ public class ExplorationCentre extends StandardAgent<Building>{
 		System.out.println("first clustering");
 		List<List<EntityID>> newClusters = clusterEntities(entities, clusterCenters);		
 		printClusters(newClusters, clusterCenters);
-		List<List<EntityID>> clusters;
 		do {
 			System.out.println("New clustering! #"+itrCounter);
 			clusters = newClusters;
@@ -82,6 +130,7 @@ public class ExplorationCentre extends StandardAgent<Building>{
 		while(!(sameAssignment(clusters, newClusters)) && ++itrCounter < maxItr);
 
 		System.out.println("Clustering done!");
+		getAgentAssigment();
 		return newClusters;
 	}
 	
@@ -171,17 +220,5 @@ public class ExplorationCentre extends StandardAgent<Building>{
 		int c = (int)Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
 		return c;
 	}
-	
-	@Override
-	protected EnumSet<StandardEntityURN> getRequestedEntityURNsEnum() {
-		return null;
-	}
 
-	@Override
-	protected void think(int time, ChangeSet changed, Collection<Command> heard) {
-		sendSubscribe(time, 1);	
-		
-	}
-	
-	
 }

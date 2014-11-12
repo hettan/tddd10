@@ -2,6 +2,8 @@ package sample;
 
 import java.io.IOException;
 
+import exploration.CustomLayer;
+
 import rescuecore2.components.ComponentLauncher;
 import rescuecore2.components.TCPComponentLauncher;
 import rescuecore2.components.ComponentConnectionException;
@@ -130,6 +132,14 @@ public final class LaunchSampleAgents {
         }
         catch (ComponentConnectionException e) {
             Logger.info("failed: " + e.getMessage());
+        }
+        try {
+        	Logger.info("Connecting custom layer " + (i++) + "...");
+            launcher.connect(new SampleViewer());
+            Logger.info("success");
+        }
+        catch (ComponentConnectionException e) {
+        	Logger.info("failed: " + e.getMessage());
         }
     }
 }
