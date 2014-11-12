@@ -11,6 +11,7 @@ import rescuecore2.Constants;
 import rescuecore2.Timestep;
 
 import rescuecore2.standard.view.AnimatedWorldModelViewer;
+import rescuecore2.view.LayerViewComponent;
 
 import java.awt.Dimension;
 import java.awt.BorderLayout;
@@ -22,6 +23,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+
+import exploration.CustomLayer;
 
 import java.util.List;
 import java.text.NumberFormat;
@@ -58,6 +61,11 @@ public class SampleViewer extends StandardViewer {
         JFrame frame = new JFrame("Viewer " + getViewerID() + " (" + model.getAllEntities().size() + " entities)");
         viewer = new AnimatedWorldModelViewer();
         viewer.initialise(config);
+        
+        CustomLayer mapLayer = new CustomLayer(model);
+        ((LayerViewComponent) viewer).addLayer(mapLayer);
+
+        
         viewer.view(model);
         // CHECKSTYLE:OFF:MagicNumber
         viewer.setPreferredSize(new Dimension(500, 500));
