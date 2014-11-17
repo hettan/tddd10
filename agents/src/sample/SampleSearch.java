@@ -19,7 +19,7 @@ import rescuecore2.standard.entities.Area;
 /**
    A sample search class that uses a connection graph to look up neighbours.
  */
-public final class SampleSearch {
+public final class SampleSearch implements SearchAlgorithm {
     private Map<EntityID, Set<EntityID>> graph;
 
     /**
@@ -51,40 +51,44 @@ public final class SampleSearch {
         setGraph(graph);
     }
 
-    /**
-       Set the neighbourhood graph.
-       @param newGraph The new neighbourhood graph.
-    */
-    public void setGraph(Map<EntityID, Set<EntityID>> newGraph) {
+    /* (non-Javadoc)
+	 * @see sample.ISearchAlgorithm#setGraph(java.util.Map)
+	 */
+    @Override
+	public void setGraph(Map<EntityID, Set<EntityID>> newGraph) {
         this.graph = newGraph;
     }
 
-    /**
-       Get the neighbourhood graph.
-       @return The neighbourhood graph.
-    */
-    public Map<EntityID, Set<EntityID>> getGraph() {
+    /* (non-Javadoc)
+	 * @see sample.ISearchAlgorithm#getGraph()
+	 */
+    @Override
+	public Map<EntityID, Set<EntityID>> getGraph() {
         return graph;
     }
 
-    /**
-       Do a breadth first search from one location to the closest (in terms of number of nodes) of a set of goals.
-       @param start The location we start at.
-       @param goals The set of possible goals.
-       @return The path from start to one of the goals, or null if no path can be found.
-    */
-    public List<EntityID> breadthFirstSearch(EntityID start, EntityID... goals) {
-        return breadthFirstSearch(start, Arrays.asList(goals));
+    private boolean isGoal(EntityID e, Collection<EntityID> test) {
+        return test.contains(e);
     }
 
-    /**
-       Do a breadth first search from one location to the closest (in terms of number of nodes) of a set of goals.
-       @param start The location we start at.
-       @param goals The set of possible goals.
-       @return The path from start to one of the goals, or null if no path can be found.
-    */
-    public List<EntityID> breadthFirstSearch(EntityID start, Collection<EntityID> goals) {
-        List<EntityID> open = new LinkedList<EntityID>();
+	/*
+	 * (non-Javadoc)
+	 * @see sample.ISearchAlgorithm#performSearch(rescuecore2.worldmodel.EntityID, rescuecore2.worldmodel.EntityID[])
+	 */
+	@Override
+	public List<EntityID> performSearch(EntityID start, EntityID... goals) {
+		return performSearch(start, Arrays.asList(goals));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see sample.ISearchAlgorithm#performSearch(rescuecore2.worldmodel.EntityID, java.util.Collection)
+	 */
+	@Override
+	public List<EntityID> performSearch(EntityID start,
+			Collection<EntityID> goals) {
+		
+		List<EntityID> open = new LinkedList<EntityID>();
         Map<EntityID, EntityID> ancestors = new HashMap<EntityID, EntityID>();
         open.add(start);
         EntityID next = null;
@@ -130,9 +134,5 @@ public final class SampleSearch {
             }
         } while (current != start);
         return path;
-    }
-
-    private boolean isGoal(EntityID e, Collection<EntityID> test) {
-        return test.contains(e);
-    }
+	}
 }
