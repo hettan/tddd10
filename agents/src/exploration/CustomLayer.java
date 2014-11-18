@@ -26,17 +26,19 @@ import rescuecore2.view.RenderedObject;
 import rescuecore2.worldmodel.Entity;
 import rescuecore2.worldmodel.EntityID;
 import sample.SampleCentre;
-
+//./start.sh -m ../maps/Kobe2013-all-ambulances/map -c ../maps/Kobe2013-all-ambulances/config/ --disable-traffic-sim --disable-fire-sim --use-static-civilians
 public class CustomLayer extends StandardViewLayer {
 
 	private StandardWorldModel model;
 	private List<List<EntityID>> clusters;
+	private List<EntityID> agentsAssignment;
 	List<Color> colors;
 	
 	public CustomLayer(StandardWorldModel model) {
 		this.model = model;
 		Partitioning part = new Partitioning(model);
 		clusters = part.getClustersKMeans();
+		agentsAssignment = part.getAgentAssigment();
 		
 		colors = new ArrayList<Color>();
 		colors.add(Color.pink);
@@ -45,7 +47,15 @@ public class CustomLayer extends StandardViewLayer {
 		colors.add(Color.red);
 		colors.add(Color.green);
 		colors.add(Color.black);
+		colors.add(Color.cyan);
+		colors.add(Color.darkGray);
+		//colors.add(Color.gray);
+		colors.add(Color.lightGray);
+		colors.add(Color.magenta);
+		colors.add(Color.orange);
+		colors.add(Color.white);
 	}
+	
 
 	@Override
 	public String getName() { return "CustomLayer"; } 
@@ -54,19 +64,9 @@ public class CustomLayer extends StandardViewLayer {
 	public Collection<RenderedObject> render(Graphics2D g,
 			ScreenTransform arg1, int arg2, int arg3) { 
 		
-		for(int i=0; i<clusters.size(); i++) {
-			System.out.println("Cluster #"+i+" color: "+colors.get(i%5).toString());
-			for(EntityID eID : clusters.get(i%5)) {
-				Pair<Integer, Integer> entityPos = model.getEntity(eID).getLocation(model);
-				System.out.println("entityID: "+eID.toString()+" - pos: "+
-									entityPos.first()+", "+entityPos.second());
-			}
-			System.out.println("\n");
-		}
-		
 		Collection<RenderedObject> objects = new HashSet<RenderedObject>(); 
 		for(int i=0; i<clusters.size(); i++) {
-			g.setColor(colors.get(i % 5));
+			g.setColor(colors.get(i % colors.size()));
 			List<EntityID> cluster = clusters.get(i);
 			for(EntityID eID : cluster) {
 				Pair<Integer, Integer> pos = model.getEntity(eID).getLocation(model);
@@ -76,6 +76,16 @@ public class CustomLayer extends StandardViewLayer {
 				g.fill(dot);
 				objects.add(new RenderedObject(null, dot));
 			}
+		}
+		
+		for(int i=0; i<agentsAssignment.size(); i++) {
+			g.setColor(colors.get(i % colors.size()));
+			Pair<Integer, Integer> pos = model.getEntity(agentsAssignment.get(i)).getLocation(model);
+			Ellipse2D.Double dot = new Ellipse2D.Double(
+					arg1.xToScreen(pos.first()-15000),
+					arg1.yToScreen(pos.second()+15000), 30, 30);
+			g.fill(dot);
+			objects.add(new RenderedObject(null, dot));
 		}
 		/*for (StandardEntity entity : 
         	model.getEntitiesOfType(StandardEntityURN.POLICE_FORCE, 
