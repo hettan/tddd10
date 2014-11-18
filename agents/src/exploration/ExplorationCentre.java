@@ -34,7 +34,8 @@ public class ExplorationCentre extends StandardAgent<Building>{
             System.out.println("myID = "+this.getID());
             agents = new ArrayList<EntityID>();
             for (StandardEntity entity : 
-            	model.getEntitiesOfType(StandardEntityURN.POLICE_FORCE, 
+            	model.getEntitiesOfType(
+            			StandardEntityURN.POLICE_FORCE, 
             			StandardEntityURN.FIRE_BRIGADE,
 						StandardEntityURN.AMBULANCE_TEAM)) {
             	agents.add(entity.getID());
