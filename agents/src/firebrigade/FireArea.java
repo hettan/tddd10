@@ -27,4 +27,11 @@ public interface FireArea {
 	 * Gets all the buildings in this area
 	 */
 	List<Integer> getBuildingsInArea();
+	
+	/*
+	 * Checks if the current fire area includes the specified building.
+	 * 
+	 * @param buildingID: the specified building.
+	 */
+	boolean contains(int buildingID);
 }

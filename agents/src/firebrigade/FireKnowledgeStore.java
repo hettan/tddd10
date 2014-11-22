@@ -25,6 +25,12 @@ public interface FireKnowledgeStore {
 	void extinguishedFire(int buildingID);
 	
 	/*
+	 * Updates the knowledge store with the new fact that
+	 * the specified building has burnt to the ground.
+	 */
+	void burntOutFire(int buildingID);
+	
+	/*
 	 * Gets the FireArea in which a building belongs to.
 	 * If the building doesn't belong to an area, it returns null.
 	 * 
