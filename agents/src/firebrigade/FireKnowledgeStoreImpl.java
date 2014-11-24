@@ -20,8 +20,8 @@ public class FireKnowledgeStoreImpl implements FireKnowledgeStore {
 		{ 
 			//The building doesn't belong to an exisiting FA. Create new
 			belongsTo = new FireAreaImpl();
+			_fireAreas.add(belongsTo);
 		}
-		
 		belongsTo.addFire(buildingID);
 	}
 
@@ -64,6 +64,15 @@ public class FireKnowledgeStoreImpl implements FireKnowledgeStore {
 	private FireArea belongsToKnownFireArea(int buildingID)
 	{
 		return null;
+	}
+	
+	@Override
+	public boolean contains(int buildingID)
+	{
+		for(FireArea area : getFireAreas())
+			if(area.contains(buildingID))
+				return true;
+		return false;
 	}
 
 }
