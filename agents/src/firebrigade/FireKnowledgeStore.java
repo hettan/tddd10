@@ -48,4 +48,11 @@ public interface FireKnowledgeStore {
 	 * Gets all the fire areas. (which the knowledge store knows of).
 	 */
 	List<FireArea> getFireAreas();
+	
+	/*
+	 * Checks if the fire knowledge store contains knowledge about
+	 * the specified burning building.
+	 * @param buildingID: the specified building 
+	 */
+	boolean contains(int buildingID);
 }

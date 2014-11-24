@@ -130,5 +130,15 @@ public final class LaunchSampleAgents {
         catch (ComponentConnectionException e) {
             Logger.info("failed: " + e.getMessage());
         }
+        try {
+            Logger.info("Connecting fire area viewer...");
+            launcher.connect(new firebrigade.FireAreaViewer());
+            Logger.info("success");
+        } 
+        catch(ComponentConnectionException e)
+        {
+
+            Logger.info("failed: " + e.getMessage());
+        }
     }
 }
