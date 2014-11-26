@@ -82,7 +82,7 @@ public class FireAreaViewLayer  extends AbstractViewLayer {
 		_model = (StandardWorldModel)arg0[0];
 		if(_knowledgeStore == null)
 		{
-			_knowledgeStore = new FireKnowledgeStoreImpl();
+			_knowledgeStore = new FireKnowledgeStoreImpl(_model);
 		}
 		
 		Collection<StandardEntity> buildings = _model.getEntitiesOfType(StandardEntityURN.BUILDING);
