@@ -61,6 +61,7 @@ public final class LaunchSampleAgents {
                 }
             }
             // CHECKSTYLE:ON:ModifiedControlVariable
+            System.out.println("Host: " + host + ":" + port + "\nConfig: " + config);
             ComponentLauncher launcher = new TCPComponentLauncher(host, port, config);
             connect(launcher, fb, pf, at, config);
         }
@@ -126,6 +127,14 @@ public final class LaunchSampleAgents {
                 launcher.connect(new DummyAgent());
                 Logger.info("success");
             }
+        }
+        catch (ComponentConnectionException e) {
+            Logger.info("failed: " + e.getMessage());
+        }
+        try {
+            Logger.info("Connecting viewer...");
+            launcher.connect(new SampleViewer());
+            Logger.info("success");
         }
         catch (ComponentConnectionException e) {
             Logger.info("failed: " + e.getMessage());
