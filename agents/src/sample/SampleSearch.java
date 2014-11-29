@@ -87,7 +87,7 @@ public final class SampleSearch implements SearchAlgorithm {
 	@Override
 	public List<EntityID> performSearch(EntityID start,
 			Collection<EntityID> goals) {
-		
+
 		List<EntityID> open = new LinkedList<EntityID>();
         Map<EntityID, EntityID> ancestors = new HashMap<EntityID, EntityID>();
         open.add(start);
@@ -134,5 +134,12 @@ public final class SampleSearch implements SearchAlgorithm {
             }
         } while (current != start);
         return path;
+	}
+
+
+	@Override
+	public List<EntityID> getPriorityNodes() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
