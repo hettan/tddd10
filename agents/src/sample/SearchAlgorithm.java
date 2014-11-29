@@ -44,5 +44,10 @@ public interface SearchAlgorithm {
 	 */
 	public abstract List<EntityID> performSearch(EntityID start,
 			Collection<EntityID> goals);
+	
+	/**
+	 * Get the most vital nodes for the search algorithm
+	 */
+	public abstract List<EntityID> getPriorityNodes();
 
 }
