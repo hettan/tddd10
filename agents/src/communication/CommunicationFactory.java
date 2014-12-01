@@ -7,8 +7,8 @@ package communication;
  */
 public class CommunicationFactory {
 
-	public static ICommunication createCommunicationDevice()
+	public static CommunicationDevice createCommunicationDevice()
 	{
-		return new Communication();
+		return new CommunicationDeviceTemporaryImpl();
 	}
 }
