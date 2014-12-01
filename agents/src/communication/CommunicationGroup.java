@@ -3,5 +3,6 @@ package communication;
 public enum CommunicationGroup {
 	FIREBRIGADE,
 	POLICE,
-	AMBULANCE
+	AMBULANCE,
+	ALL
 }
