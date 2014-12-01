@@ -10,9 +10,9 @@ import rescuecore2.worldmodel.EntityID;
 
 public class Message {
 	public String data;
-	public Communication.Type type;
+	public CommunicationType type;
 	public int time;
 	public EntityID sender;
 	public List<EntityID> dest;
-	public Communication.Group destGroup; 	
+	public CommunicationGroup destGroup; 	
 }
