@@ -2,7 +2,7 @@ package communication;
 
 import java.util.List;
 
-public interface ICommunication {
+public interface CommunicationDevice {
 
 	/*
 	 * Registers this communication device to listen
