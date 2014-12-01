@@ -18,8 +18,9 @@ public interface ICommunication {
 	 * the device is listening to.
 	 * 
 	 * @param type the type of message to fetch
+	 * @param time the current simulation time (maybe used to maintain caches)
 	 */
-	List<Message> getMessages(CommunicationType type);
+	List<Message> getMessages(CommunicationType type, int time);
 	
 	/*
 	 * Transmits the specified message to the network.
