@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class Communication implements ICommunication {
+public class CommunicationDeviceTemporaryImpl implements CommunicationDevice {
 	
 	List<Byte> buffer = new ArrayList<Byte>();
 	//public static enum Type {request, notification, assignment};
@@ -59,7 +59,7 @@ public class Communication implements ICommunication {
 	}
 	
 	
-	public Communication()
+	public CommunicationDeviceTemporaryImpl()
 	{
 		groups = new ArrayList<CommunicationGroup>();
 	}
