@@ -1,4 +1,4 @@
-package sample;
+package navigation_emil;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -7,8 +7,6 @@ import java.util.List;
 
 import rescuecore2.misc.Pair;
 import rescuecore2.standard.entities.Area;
-import rescuecore2.standard.entities.Building;
-import rescuecore2.standard.entities.Road;
 import rescuecore2.standard.entities.StandardEntity;
 import rescuecore2.standard.entities.StandardWorldModel;
 import rescuecore2.worldmodel.EntityID;

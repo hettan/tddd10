@@ -1,4 +1,4 @@
-package sample;
+package navigation_emil;
 
 import java.util.Collection;
 import java.util.List;
@@ -8,6 +8,7 @@ import java.util.Set;
 import rescuecore2.standard.entities.Area;
 import rescuecore2.standard.entities.StandardWorldModel;
 import rescuecore2.worldmodel.EntityID;
+import sample.SearchAlgorithm;
 
 public class GridBasedSearch implements SearchAlgorithm{
 

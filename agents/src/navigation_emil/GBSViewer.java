@@ -1,8 +1,9 @@
-package sample;
+package navigation_emil;
 
 import static rescuecore2.misc.java.JavaTools.instantiate;
 
 import rescuecore2.messages.control.KVTimestep;
+import rescuecore2.view.LayerViewComponent;
 import rescuecore2.view.ViewComponent;
 import rescuecore2.view.ViewListener;
 import rescuecore2.view.RenderedObject;
@@ -31,7 +32,7 @@ import rescuecore2.standard.components.StandardViewer;
 /**
    A simple viewer.
  */
-public class SampleViewer extends StandardViewer {
+public class GBSViewer extends StandardViewer {
     private static final int DEFAULT_FONT_SIZE = 20;
     private static final int PRECISION = 3;
 
@@ -40,12 +41,14 @@ public class SampleViewer extends StandardViewer {
     private static final String TEAM_NAME_KEY = "viewer.team-name";
 
     private ScoreFunction scoreFunction;
-    private ViewComponent viewer;
+    private LayerViewComponent viewer;
     private JLabel timeLabel;
     private JLabel scoreLabel;
     private JLabel teamLabel;
     private JLabel mapLabel;
     private NumberFormat format;
+    
+    private GridBasedSearch gbSearch;
 
     @Override
     protected void postConnect() {
@@ -95,6 +98,7 @@ public class SampleViewer extends StandardViewer {
         mapLabel.setFont(timeLabel.getFont().deriveFont(Font.PLAIN, fontSize));
         
         frame.add(viewer, BorderLayout.CENTER);
+
         // CHECKSTYLE:OFF:MagicNumber
         JPanel labels = new JPanel(new GridLayout(1, 4));
         // CHECKSTYLE:ON:MagicNumber
@@ -108,7 +112,9 @@ public class SampleViewer extends StandardViewer {
             frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         }
         frame.setVisible(true);
-
+        
+        GridBasedSearch gbSearch = new GridBasedSearch(model);
+        viewer.addLayer(new PathViewer(gbSearch, model.getBounds().getBounds()));
         viewer.addViewListener(new ViewListener() {
                 @Override
                 public void objectsClicked(ViewComponent view, List<RenderedObject> objects) {

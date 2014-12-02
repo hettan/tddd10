@@ -1,4 +1,4 @@
-package navigationUtils;
+package navigation_emil;
 
 public class AStarAlgorithm {
 	
