@@ -53,4 +53,10 @@ public class GridBasedSearch implements SearchAlgorithm{
 		return null;
 	}
 
+	@Override
+	public List<EntityID> getPriorityNodes() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
