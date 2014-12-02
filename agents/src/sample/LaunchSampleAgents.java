@@ -2,6 +2,8 @@ package sample;
 
 import java.io.IOException;
 
+import navigation_emil.GBSViewer;
+
 import rescuecore2.components.ComponentLauncher;
 import rescuecore2.components.TCPComponentLauncher;
 import rescuecore2.components.ComponentConnectionException;
@@ -133,7 +135,10 @@ public final class LaunchSampleAgents {
         }
         try {
             Logger.info("Connecting viewer...");
-            launcher.connect(new SampleViewer());
+            //launcher.connect(new SampleViewer());
+            System.out.println("Connecting viewer...");
+            launcher.connect(new GBSViewer());
+            System.out.println("success");
             Logger.info("success");
         }
         catch (ComponentConnectionException e) {
