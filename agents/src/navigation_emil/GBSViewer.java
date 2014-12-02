@@ -114,7 +114,7 @@ public class GBSViewer extends StandardViewer {
         frame.setVisible(true);
         
         GridBasedSearch gbSearch = new GridBasedSearch(model);
-        viewer.addLayer(new PathViewer(gbSearch, model.getBounds().getBounds()));
+        viewer.addLayer(new GBSViewLayer(gbSearch, model.getBounds().getBounds()));
         viewer.addViewListener(new ViewListener() {
                 @Override
                 public void objectsClicked(ViewComponent view, List<RenderedObject> objects) {

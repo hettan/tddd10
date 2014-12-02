@@ -13,14 +13,14 @@ import rescuecore2.standard.entities.Area;
 import rescuecore2.view.AbstractViewLayer;
 import rescuecore2.view.RenderedObject;
 
-public class PathViewer extends AbstractViewLayer {
+public class GBSViewLayer extends AbstractViewLayer {
 
 	List<Area> gates;
 	Rectangle worldSize;
 	int gridSize;
 	
 	
-	public PathViewer(GridBasedSearch gbSearch, Rectangle worldSize) {
+	public GBSViewLayer(GridBasedSearch gbSearch, Rectangle worldSize) {
 		super();
 		gridSize = gbSearch.getGridSize();
 		gates = gbSearch.getGates();
@@ -30,7 +30,7 @@ public class PathViewer extends AbstractViewLayer {
 
 	@Override
 	public String getName() {
-		return "PathViewer";
+		return "GBSViewLayer";
 	}
 
 	@Override

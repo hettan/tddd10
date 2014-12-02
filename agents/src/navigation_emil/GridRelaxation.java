@@ -40,8 +40,7 @@ public class GridRelaxation extends StandardWorldModel {
 		box.GridY = y;
 		box.Width = boxWidth;
 		box.Height = boxHeight;
-		Rectangle boxRect = new Rectangle(box.X, box.Y,
-				box.X + box.Width, box.Y + box.Height);
+		Rectangle boxRect = box.getRectangle();
 		StandardEntity entity;
 		Area area;
 		Iterator<StandardEntity> entityIterator = model.getObjectsInRectangle(box.X, box.Y,
@@ -90,6 +89,9 @@ public class GridRelaxation extends StandardWorldModel {
 		public int GridX, GridY;
 		public int Width, Height;
 		public List<Gate> Gates = new ArrayList<Gate>();
+		public Rectangle getRectangle() {
+			return new Rectangle(X, Y, Width, Height);
+		}
 	}
 	
 	class Gate {
@@ -99,5 +101,38 @@ public class GridRelaxation extends StandardWorldModel {
 		public Area GateArea;
 		public Pair<Gate, List<Area>> externalGate = null;
 		public List<Pair<Gate, List<Area>>> internalGates = new ArrayList<Pair<Gate, List<Area>>>();
+	}
+	
+	class Path {
+		private double length;
+		private List<Area> path;
+		public Path(Area from, Area to) {
+			
+		}
+	}
+	
+	public class SearchArea extends Searchable<Area> {
+
+		public SearchArea(Area area) {
+			super(area, area.getID().getValue(), 0, 0, null);
+		}
+		
+		public SearchArea(Area base, int uniqueId, double distance, double heuristic,
+				SearchArea parentNode) {
+			super(base, uniqueId, distance, heuristic, parentNode);
+		}
+
+		@Override
+		public Searchable<Area> createNode(Area baseObject,
+				Searchable<Area> parentObject, Searchable<Area> goalObject) {
+			double dx = baseObject.getX() - parentObject.getNodeObject().getX();
+			double dy = baseObject.getY() - parentObject.getNodeObject().getY();
+			double d = parentObject.getDistance() + Math.sqrt(dx*dx + dy*dy);
+			dx = baseObject.getX() - goalObject.getNodeObject().getX();
+			dy = baseObject.getY() - goalObject.getNodeObject().getY();
+			double h = Math.sqrt(dx*dx + dy*dy);
+			return new SearchArea(baseObject, baseObject.getID().getValue(), d, h, (SearchArea)parentObject);
+		}
+		
 	}
 }

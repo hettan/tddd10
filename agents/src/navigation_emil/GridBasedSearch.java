@@ -1,11 +1,15 @@
 package navigation_emil;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import navigation_emil.GridRelaxation.SearchArea;
+
 import rescuecore2.standard.entities.Area;
+import rescuecore2.standard.entities.StandardEntity;
 import rescuecore2.standard.entities.StandardWorldModel;
 import rescuecore2.worldmodel.EntityID;
 import sample.SearchAlgorithm;
@@ -42,14 +46,23 @@ public class GridBasedSearch implements SearchAlgorithm{
 
 	@Override
 	public List<EntityID> performSearch(EntityID start, EntityID... goals) {
-		// TODO Auto-generated method stub
-		return null;
+		StandardEntity startEntity = model.getEntity(start);
+		StandardEntity goalEntity = model.getEntity(goals[0]);
+		if(!(startEntity instanceof Area)) return new ArrayList<EntityID>();
+		if(!(goalEntity instanceof Area)) return new ArrayList<EntityID>();
+		SearchArea startArea = worldRelax.new SearchArea((Area) startEntity);
+		SearchArea goalArea = worldRelax.new SearchArea((Area) goalEntity);
+		List<Area> path = AStarAlgorithm.PerformSearch(startArea, goalArea);
+		List<EntityID> result = new ArrayList<EntityID>();
+		for(Area area : path) {
+			result.add(area.getID());
+		}
+		return result;
 	}
 
 	@Override
 	public List<EntityID> performSearch(EntityID start,
 			Collection<EntityID> goals) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
