@@ -5,13 +5,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import navigation_emil.AStarAlgorithm.PathLenTuple;
+
 import rescuecore2.misc.Pair;
 import rescuecore2.standard.entities.Area;
 import rescuecore2.standard.entities.StandardEntity;
 import rescuecore2.standard.entities.StandardWorldModel;
 import rescuecore2.worldmodel.EntityID;
 
-public class GridRelaxation extends StandardWorldModel {
+public class GridRelaxation {
 	
 	private int worldWidth, worldHeight, boxWidth, boxHeight, gridSize;
 	private GridBox[] grid;
@@ -23,13 +25,50 @@ public class GridRelaxation extends StandardWorldModel {
 		this.gridSize = gridSize;
 		boxWidth = worldWidth / gridSize;
 		boxHeight = worldHeight / gridSize;
+		
+		BuildGrid(fromModel);
+		ConnectGates(fromModel);
+	}
+	
+	private void BuildGrid(StandardWorldModel model) {
 		grid = new GridBox[gridSize*gridSize];
 		for(int x = 0; x < gridSize; x++) {
 			for(int y = 0; y < gridSize; y++) {
-				grid[y*gridSize + x] = CreateBox(x, y, fromModel);
+				grid[y*gridSize + x] = CreateBox(x, y, model);
 			}
 		}
-		System.out.println("Grid initialized. Total gates: " + nGates);
+	}
+	
+	private void ConnectGates(StandardWorldModel model) {
+		List<Gate> gates = getGates();
+		Gate fromGate, toGate;
+		int gSize = gates.size();
+		Path path;
+		for(int i = 0; i < gSize; i++) {
+			fromGate = gates.get(i);
+			for(int j = i+1; j < gSize; j++) {
+				toGate = gates.get(j);
+				if(fromGate.gridBox.GridX == toGate.gridBox.GridX &&
+						fromGate.gridBox.GridY == toGate.gridBox.GridY) {
+					// Inside same GridBox -> Internal gates
+					path = new Path(fromGate, toGate, model, fromGate.gridBox.getRectangle());
+					fromGate.internalGates.add(path);
+					toGate.internalGates.add(path.getReversedInstance());
+				} else {
+					// Crossing borders, see if other gate is connected
+					for(EntityID eId : fromGate.gateArea.getNeighbours()) {
+						StandardEntity se = model.getEntity(eId);
+						if(!(se instanceof Area)) continue;
+						if(se.getID().getValue() == toGate.gateArea.getID().getValue()) {
+							// It is connected! -> External gate
+							path = new Path(fromGate, toGate, model);
+							fromGate.externalGates.add(path);
+							toGate.externalGates.add(path.getReversedInstance());
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	private GridBox CreateBox(int x, int y, StandardWorldModel model) {
@@ -51,7 +90,7 @@ public class GridRelaxation extends StandardWorldModel {
 				area = (Area) entity;
 				if(!boxRect.contains(area.getX(), area.getY())) continue;
 				if(isEdgeArea(area, boxRect, model)) {
-					box.Gates.add(new Gate(area));
+					box.Gates.add(new Gate(area, box));
 					nGates++;
 				}
 			}
@@ -74,11 +113,21 @@ public class GridRelaxation extends StandardWorldModel {
 		return false;
 	}
 	
-	public List<Area> getGates() {
+	public List<Area> getGateAreas() {
 		List<Area> gates = new ArrayList<Area>();
 		for(GridBox box : grid) {
 			for(Gate gate : box.Gates) {
-				gates.add(gate.GateArea);
+				gates.add(gate.gateArea);
+			}
+		}
+		return gates;
+	}
+	
+	public List<Gate> getGates() {
+		List<Gate> gates = new ArrayList<Gate>();
+		for(GridBox box : grid) {
+			for(Gate gate : box.Gates) {
+				gates.add(gate);
 			}
 		}
 		return gates;
@@ -95,31 +144,73 @@ public class GridRelaxation extends StandardWorldModel {
 	}
 	
 	class Gate {
-		public Gate(Area area) {
-			GateArea = area;
+		public Gate(Area area, GridBox gridBox) {
+			gateArea = area;
+			this.gridBox = gridBox;
 		}
-		public Area GateArea;
-		public Pair<Gate, List<Area>> externalGate = null;
-		public List<Pair<Gate, List<Area>>> internalGates = new ArrayList<Pair<Gate, List<Area>>>();
+		public GridBox gridBox;
+		public Area gateArea;
+		public List<Path> externalGates = new ArrayList<Path>();
+		public List<Path> internalGates = new ArrayList<Path>();
 	}
 	
 	class Path {
-		private double length;
-		private List<Area> path;
-		public Path(Area from, Area to) {
+		protected PathLenTuple<Area> mPath;
+		protected Gate fromGate, toGate;
+		public Path(Gate from, Gate to, StandardWorldModel model) {
+			this(from, to, model, null);
+		}
+		public Path(Gate from, Gate to, StandardWorldModel model, Rectangle limitArea) {
+			SearchArea start = new SearchArea(from.gateArea, model, limitArea);
+			SearchArea goal = new SearchArea(to.gateArea, model, limitArea);
+			mPath = AStarAlgorithm.PerformSearch(start, goal);
+			fromGate = from;
+			toGate = to;
+		}
+		protected Path() {
 			
+		}
+		public List<Area> getPath() {
+			return mPath.getPath();
+		}
+		public double getLength() {
+			return mPath.getLength();
+		}
+		public Gate getFromGate() {
+			return fromGate;
+		}
+		public Gate getToGate() {
+			return toGate;
+		}
+		public Path getReversedInstance() {
+			Path rPath = new Path();
+			rPath.fromGate = toGate;
+			rPath.toGate = fromGate;
+			rPath.mPath = new PathLenTuple<Area>();
+			rPath.mPath.setLength(getLength());
+			for(Area a : mPath.getPath()) {
+				rPath.mPath.addPathElement(0, a);
+			}
+			return rPath;
 		}
 	}
 	
-	public class SearchArea extends Searchable<Area> {
+	public static class SearchArea extends Searchable<Area> {
 
-		public SearchArea(Area area) {
+		StandardWorldModel model;
+		Rectangle limitationArea = null;
+		
+		public SearchArea(Area area, StandardWorldModel model, Rectangle limit) {
 			super(area, area.getID().getValue(), 0, 0, null);
+			this.model = model;
+			this.limitationArea = limit;
 		}
 		
 		public SearchArea(Area base, int uniqueId, double distance, double heuristic,
-				SearchArea parentNode) {
+				SearchArea parentNode, StandardWorldModel model, Rectangle limit) {
 			super(base, uniqueId, distance, heuristic, parentNode);
+			this.model = model;
+			this.limitationArea = limit;
 		}
 
 		@Override
@@ -131,7 +222,16 @@ public class GridRelaxation extends StandardWorldModel {
 			dx = baseObject.getX() - goalObject.getNodeObject().getX();
 			dy = baseObject.getY() - goalObject.getNodeObject().getY();
 			double h = Math.sqrt(dx*dx + dy*dy);
-			return new SearchArea(baseObject, baseObject.getID().getValue(), d, h, (SearchArea)parentObject);
+			SearchArea node =  new SearchArea(baseObject, baseObject.getID().getValue(), d, h, (SearchArea)parentObject, model, limitationArea);
+			for(EntityID eId : baseObject.getNeighbours()) {
+				StandardEntity se = model.getEntity(eId);
+				if(se instanceof Area) {
+					if(limitationArea == null || limitationArea.contains(((Area) se).getX(), ((Area) se).getY())) {
+						node.addChild((Area) se);
+					}
+				}
+			}
+			return node;
 		}
 		
 	}

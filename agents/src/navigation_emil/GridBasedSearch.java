@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import navigation_emil.AStarAlgorithm.PathLenTuple;
 import navigation_emil.GridRelaxation.SearchArea;
 
 import rescuecore2.standard.entities.Area;
@@ -21,7 +22,7 @@ public class GridBasedSearch implements SearchAlgorithm{
 	private final int gridSize = 5;
 	
 	public List<Area> getGates() {
-		return worldRelax.getGates();
+		return worldRelax.getGateAreas();
 	}
 	
 	public int getGridSize() {
@@ -50,11 +51,13 @@ public class GridBasedSearch implements SearchAlgorithm{
 		StandardEntity goalEntity = model.getEntity(goals[0]);
 		if(!(startEntity instanceof Area)) return new ArrayList<EntityID>();
 		if(!(goalEntity instanceof Area)) return new ArrayList<EntityID>();
-		SearchArea startArea = worldRelax.new SearchArea((Area) startEntity);
-		SearchArea goalArea = worldRelax.new SearchArea((Area) goalEntity);
-		List<Area> path = AStarAlgorithm.PerformSearch(startArea, goalArea);
+		
+		SearchArea startArea = new SearchArea((Area) startEntity, model, null);
+		SearchArea goalArea = new SearchArea((Area) goalEntity, model, null);
+		
+		PathLenTuple<Area> path = AStarAlgorithm.PerformSearch(startArea, goalArea);
 		List<EntityID> result = new ArrayList<EntityID>();
-		for(Area area : path) {
+		for(Area area : path.getPath()) {
 			result.add(area.getID());
 		}
 		return result;

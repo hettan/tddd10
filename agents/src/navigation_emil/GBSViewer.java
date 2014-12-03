@@ -113,7 +113,10 @@ public class GBSViewer extends StandardViewer {
         }
         frame.setVisible(true);
         
-        GridBasedSearch gbSearch = new GridBasedSearch(model);
+        SimpleTimer.reset("GridRelaxation init time: ");
+        gbSearch = new GridBasedSearch(model);
+        SimpleTimer.printTime();
+        
         viewer.addLayer(new GBSViewLayer(gbSearch, model.getBounds().getBounds()));
         viewer.addViewListener(new ViewListener() {
                 @Override
