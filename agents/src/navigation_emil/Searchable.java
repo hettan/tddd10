@@ -32,8 +32,6 @@ public abstract class Searchable<T> implements Comparable<Searchable<T>> {
 		this.children = children;
 	}
 	public void addChild(T child) {
-		if(this.children == null)
-			this.children = new ArrayList<T>();
 		this.children.add(child);
 	}
 	public Searchable(T baseObject, int uniqueId, double distance, double heuristic, Searchable<T> parentNode) {
@@ -42,6 +40,7 @@ public abstract class Searchable<T> implements Comparable<Searchable<T>> {
 		this.parentNode = parentNode;
 		this.id = uniqueId;
 		this.nodeObject = baseObject;
+		this.children = new ArrayList<T>();
 	}
 	public int getUniqueId() {
 		return id;

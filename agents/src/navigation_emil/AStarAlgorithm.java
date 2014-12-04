@@ -26,15 +26,17 @@ public class AStarAlgorithm {
 		Searchable<T> current = null, child;
 		while(!frontier.isEmpty()) {
 			current = frontier.poll();
+			if(closed.contains(current.getUniqueId())) continue;
 			closed.add(current.getUniqueId());
-			if(open.contains(current.getUniqueId())) continue;
-			if(current != null && current.getUniqueId() == end.getUniqueId())
+			if(current != null && current.getUniqueId() == end.getUniqueId()) {
 				break; // We found the end;
+			}
 			
 			for(T childBase : current.getChildren()) {
 				child = current.createNode(childBase, current, end);
-				if(child != null && !closed.contains(child.getUniqueId())) {
+				if(child != null && !open.contains(child.getUniqueId())) {
 					frontier.add(child);
+					open.add(child.getUniqueId());
 				}
 			}
 		}

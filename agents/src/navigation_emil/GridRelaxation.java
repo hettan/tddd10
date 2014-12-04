@@ -204,6 +204,7 @@ public class GridRelaxation {
 			super(area, area.getID().getValue(), 0, 0, null);
 			this.model = model;
 			this.limitationArea = limit;
+			fillChildren();
 		}
 		
 		public SearchArea(Area base, int uniqueId, double distance, double heuristic,
@@ -211,6 +212,7 @@ public class GridRelaxation {
 			super(base, uniqueId, distance, heuristic, parentNode);
 			this.model = model;
 			this.limitationArea = limit;
+			fillChildren();
 		}
 
 		@Override
@@ -223,16 +225,19 @@ public class GridRelaxation {
 			dy = baseObject.getY() - goalObject.getNodeObject().getY();
 			double h = Math.sqrt(dx*dx + dy*dy);
 			SearchArea node =  new SearchArea(baseObject, baseObject.getID().getValue(), d, h, (SearchArea)parentObject, model, limitationArea);
-			for(EntityID eId : baseObject.getNeighbours()) {
-				StandardEntity se = model.getEntity(eId);
-				if(se instanceof Area) {
-					if(limitationArea == null || limitationArea.contains(((Area) se).getX(), ((Area) se).getY())) {
-						node.addChild((Area) se);
-					}
-				}
-			}
+			node.fillChildren();
 			return node;
 		}
 		
+		protected void fillChildren() {
+			for(EntityID eId : getNodeObject().getNeighbours()) {
+				StandardEntity se = model.getEntity(eId);
+				if(se instanceof Area) {
+					if(limitationArea == null || limitationArea.contains(((Area) se).getX(), ((Area) se).getY())) {
+						addChild((Area) se);
+					}
+				}
+			}
+		}
 	}
 }
