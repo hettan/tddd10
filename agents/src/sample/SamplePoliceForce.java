@@ -74,7 +74,7 @@ public class SamplePoliceForce extends AbstractSampleAgent<PoliceForce> {
             return;
         }
         // Plan a path to a blocked area
-        List<EntityID> path = search.breadthFirstSearch(me().getPosition(), getBlockedRoads());
+        List<EntityID> path = search.performSearch(me().getPosition(), getBlockedRoads());
         if (path != null) {
             Logger.info("Moving to target");
             Road r = (Road)model.getEntity(path.get(path.size() - 1));

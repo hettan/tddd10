@@ -109,7 +109,7 @@ public class SampleCivilian extends AbstractSampleAgent<Civilian> {
         }
         if (damage == 0 && buriedness == 0) {
             // Run for the refuge
-            List<EntityID> path = search.breadthFirstSearch(me().getPosition(), refugeIDs);
+            List<EntityID> path = search.performSearch(me().getPosition(), refugeIDs);
             if (path != null) {
                 Logger.info("Heading for a refuge");
                 sendMove(time, path);
