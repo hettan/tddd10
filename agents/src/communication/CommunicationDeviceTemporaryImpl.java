@@ -19,8 +19,11 @@ public class CommunicationDeviceTemporaryImpl implements CommunicationDevice {
 	 * Temporary solution. Uses static list of all groups, which contains a list of the belonging messages.
 	 */
 	private Object notificationLock = new Object();
+	private Object assignmentLock = new Object();
 	private static int REMOVE_TIME = 4; //Keep messages for 4 time steps.
 	private static HashMap<CommunicationGroup, List<Message>> notificationMessages = new HashMap<CommunicationGroup, List<Message>>();
+	private static HashMap<CommunicationGroup, List<Message>> assignmentMessages = new HashMap<CommunicationGroup, List<Message>>();
+	
 	private void addNotification(Message message)
 	{
 		synchronized(notificationLock)
@@ -30,6 +33,18 @@ public class CommunicationDeviceTemporaryImpl implements CommunicationDevice {
 				notificationMessages.put(message.destGroup, new ArrayList<Message>());
 			}
 			notificationMessages.get(message.destGroup).add(message);
+		}
+	}
+	
+	private void addAssignment(Message message)
+	{
+		synchronized(assignmentLock)
+		{
+			if(!assignmentMessages.containsKey(message.destGroup))
+			{
+				assignmentMessages.put(message.destGroup, new ArrayList<Message>());
+			}
+			assignmentMessages.get(message.destGroup).add(message);
 		}
 	}
 	
@@ -58,6 +73,30 @@ public class CommunicationDeviceTemporaryImpl implements CommunicationDevice {
 		return new ArrayList<Message>();
 	}
 	
+	private List<Message> getAssignments(CommunicationGroup group, int time)
+	{
+		synchronized(assignmentLock)
+		{
+			if(assignmentMessages.containsKey(group))
+			{
+				ArrayList<Message> toRemove = new ArrayList<Message>();
+				for(Message message : assignmentMessages.get(group))
+				{
+					if(message.time < time - REMOVE_TIME)
+						toRemove.add(message);
+				}
+				assignmentMessages.get(group).removeAll(toRemove);
+				
+				ArrayList<Message> ret = new ArrayList<Message>();
+				for(Message message : assignmentMessages.get(group))
+					if(message.time < time) //(because of the threads, and static storage, messages can be passed instantly. avoid this.
+						ret.add(message); //Only add messages which have been "sent".
+				
+				return ret;
+			}
+		}
+		return new ArrayList<Message>();
+	}
 	
 	public CommunicationDeviceTemporaryImpl()
 	{
@@ -86,6 +125,13 @@ public class CommunicationDeviceTemporaryImpl implements CommunicationDevice {
 				messages.addAll(getNotifications(group, time));
 			}
 		}
+		if(type == CommunicationType.ASSIGNMENT)
+		{
+			for(CommunicationGroup group : groups)
+			{
+				messages.addAll(getAssignments(group, time));
+			}
+		}
 		
 		return messages;
 	}
@@ -96,6 +142,9 @@ public class CommunicationDeviceTemporaryImpl implements CommunicationDevice {
 		
 		if(message.type == CommunicationType.NOTIFICATION)
 			addNotification(message);
+		
+		if(message.type == CommunicationType.ASSIGNMENT)
+			addAssignment(message);
 		
 		return true;
 	}
