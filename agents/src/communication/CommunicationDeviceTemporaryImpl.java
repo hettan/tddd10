@@ -20,7 +20,7 @@ public class CommunicationDeviceTemporaryImpl implements CommunicationDevice {
 	 */
 	private Object notificationLock = new Object();
 	private Object assignmentLock = new Object();
-	private static int REMOVE_TIME = 4; //Keep messages for 4 time steps.
+	private static int REMOVE_TIME = 1; //Keep messages for 4 time steps.
 	private static HashMap<CommunicationGroup, List<Message>> notificationMessages = new HashMap<CommunicationGroup, List<Message>>();
 	private static HashMap<CommunicationGroup, List<Message>> assignmentMessages = new HashMap<CommunicationGroup, List<Message>>();
 	
