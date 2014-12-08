@@ -140,5 +140,16 @@ public final class LaunchSampleAgents {
 
             Logger.info("failed: " + e.getMessage());
         }
+
+        try {
+            Logger.info("Connecting fire area viewer...");
+            launcher.connect(new firebrigade.prediction.training.TrainingFitnessObserver());
+            Logger.info("success");
+        } 
+        catch(ComponentConnectionException e)
+        {
+
+            Logger.info("failed: " + e.getMessage());
+        }
     }
 }
