@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 
+import exploration.ExplorationAgent;
+
 import rescuecore2.worldmodel.EntityID;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.messages.Command;
@@ -22,7 +24,7 @@ import rescuecore2.standard.entities.FireBrigade;
 /**
    A sample fire brigade agent.
  */
-public class SampleFireBrigade extends AbstractSampleAgent<FireBrigade> {
+public class SampleFireBrigade extends ExplorationAgent<FireBrigade> {//AbstractSampleAgent<FireBrigade> {
     private static final String MAX_WATER_KEY = "fire.tank.maximum";
     private static final String MAX_DISTANCE_KEY = "fire.extinguish.max-distance";
     private static final String MAX_POWER_KEY = "fire.extinguish.max-sum";
