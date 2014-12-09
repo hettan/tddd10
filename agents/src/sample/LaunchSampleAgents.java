@@ -2,6 +2,9 @@ package sample;
 
 import java.io.IOException;
 
+import ambulance.AmbulanceCentre;
+import ambulance.AmbulanceTeamAgent;
+
 import rescuecore2.components.ComponentLauncher;
 import rescuecore2.components.TCPComponentLauncher;
 import rescuecore2.components.ComponentConnectionException;
@@ -103,21 +106,36 @@ public final class LaunchSampleAgents {
         try {
             while (at-- != 0) {
                 Logger.info("Connecting ambulance team " + (i++) + "...");
-                launcher.connect(new SampleAmbulanceTeam());
+                System.out.println("Ambulance team connected");
+                launcher.connect(new AmbulanceTeamAgent());
                 Logger.info("success");
             }
         }
         catch (ComponentConnectionException e) {
             Logger.info("failed: " + e.getMessage());
         }
+//        try {
+//            while (true) {
+//                Logger.info("Connecting centre " + (i++) + "...");
+//                launcher.connect(new AmbulanceCentre());
+//                System.out.println("Ambulance centre connected");
+//                Logger.info("success");
+//            }
+//        }
+//        catch (ComponentConnectionException e) {
+//        	System.out.println("failed connecting");
+//            Logger.info("failed: " + e.getMessage());
+//        }
         try {
             while (true) {
                 Logger.info("Connecting centre " + (i++) + "...");
                 launcher.connect(new SampleCentre());
+                System.out.println("Sample centre connected");
                 Logger.info("success");
             }
         }
         catch (ComponentConnectionException e) {
+        	System.out.println("Sample failed connecting");
             Logger.info("failed: " + e.getMessage());
         }
         try {

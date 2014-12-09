@@ -39,6 +39,7 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre> {
 	@Override
 	protected void think(int time, ChangeSet changed, Collection<Command> heard) {
 		sendSubscribe(time, 1);
+		System.out.println("Ambulance Center");
 		if (frontier == null) {
 			frontier = new HashSet<EntityID>();
 			for (StandardEntity entity : model

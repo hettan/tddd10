@@ -43,7 +43,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 	@Override
 	protected EnumSet<StandardEntityURN> getRequestedEntityURNsEnum() {
 		// TODO Auto-generated method stub
-		return null;
+		return EnumSet.of(StandardEntityURN.AMBULANCE_TEAM);
 	}
 	
 	@Override
@@ -62,6 +62,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 			// Subscribe to channel 1
 			sendSubscribe(time, 2);
 		}
+		System.out.println("Ambulance team");
 		try {
 			String msg = "position "
 					+ String.valueOf(me().getPosition().getValue());
@@ -101,6 +102,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 		updateUnexploredBuildings(changed);
 		// if the agent has already a task where to go
 		if (goal != null) {
+			System.out.println("Ambulance have a goal");
 			List<EntityID> path = search.breadthFirstSearch(location().getID(),
 					goal);
 			if (path.size() == 1) {
@@ -116,6 +118,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 					e.printStackTrace();
 				}
 				if(foundSomeone == true){
+					System.out.println("Ambulance found someone");
 					for (StandardEntity next : model
 							.getEntitiesOfType(StandardEntityURN.CIVILIAN)) {
 						Human human = (Human) next;

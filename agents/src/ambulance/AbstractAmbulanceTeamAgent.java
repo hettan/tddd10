@@ -19,7 +19,6 @@ import rescuecore2.standard.kernel.comms.ChannelCommunicationModel;
 import rescuecore2.standard.kernel.comms.StandardCommunicationModel;
 import rescuecore2.worldmodel.EntityID;
 import sample.SampleSearch;
-import sample.SearchAlgorithm;
 
 public abstract class AbstractAmbulanceTeamAgent <E extends StandardEntity> extends StandardAgent<E> {
     private static final int RANDOM_WALK_LENGTH = 50;
