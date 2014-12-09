@@ -18,7 +18,8 @@ import rescuecore2.worldmodel.WorldModel;
 public class Partitioning {
 	private StandardWorldModel model;
 	private List<Tuple<Integer,Integer>> clusterCenters;
-	private List<List<EntityID>> clusters;
+	public static List<List<EntityID>> clusters;
+	public static List<EntityID> lastAgentAssignment;
 	
 	public Partitioning(StandardWorldModel model) {
 		this.model = model;
@@ -42,9 +43,9 @@ public class Partitioning {
 			Human h = (Human)entity;
 			
 			//Buried agents can't move, ignore them
-			if(h.getBuriedness() == 0) {
+			//if(h.getBuriedness() == 0) {
 				agents.add(entity.getID());
-			}
+			//}
 		}
 		
 		//Create the distance-matrix
@@ -83,6 +84,7 @@ public class Partitioning {
 			agentAssignment.set(agentIndexAssignment.get(i), agents.get(i));		
 		}
 		
+		lastAgentAssignment = agentAssignment;
 		return agentAssignment;
 	}
 	
@@ -354,10 +356,12 @@ public class Partitioning {
 		for(StandardEntity entity : this.model.getEntitiesOfType(StandardEntityURN.FIRE_BRIGADE,
        		StandardEntityURN.POLICE_FORCE, 
        		StandardEntityURN.AMBULANCE_TEAM)) {
-			Human h = (Human)entity;
-			if(h.getBuriedness() == 0) {
+			System.out.println(entity.getID());
+			//Human h = (Human)entity;
+			
+			//if(h.getBuriedness() == 0) {
 				numActiveAgents++;
-			}
+			//}
 		}
 		
 		return numActiveAgents;
