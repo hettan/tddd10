@@ -23,7 +23,6 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 	private StandardWorldModel model;
 	private AbstractMapLayer mapLayer;
 	private Map<EntityID, Set<EntityID>> graph;
-	private int previousCluster = Integer.MAX_VALUE;
 
 	/**
 	 * Standard constructor
@@ -33,7 +32,7 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 		model = modelIn;
 		mapLayer = new AbstractMapLayer(model);
 
-		System.out.println("agent using HPAstar search");
+		//System.out.println("agent using HPAstar search");
 
 		//Create the graph in the same way as sampleSearch
 		Map<EntityID, Set<EntityID>> neighbours = new LazyMap<EntityID, Set<EntityID>>() {
@@ -65,7 +64,8 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 	@SuppressWarnings("unchecked")
 	private ArrayList<Area> Search(Area start, ArrayList<Area> goalAreas) {
 
-		//	System.out.println("search for a path");
+	//	System.out.println("search for a path with hpa*, nr of goals " + goalAreas.size() + 
+	//			"starts at " + start.getID());
 
 		Queue<Path> priorityQueue = new PriorityQueue<>(20, pathComparator);
 		ArrayList<CheckedArea> checked = new ArrayList<CheckedArea>();
@@ -80,15 +80,9 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 		if(!mapLayer.isBorderNode(start)){
 			int cluster = mapLayer.getCluster(start);
 			startNode = new BorderNode(cluster, start);
-			
-			if(previousCluster != cluster){
-				mapLayer.CreateIntraEdge(startNode);
-			} else {
-				//Probably stuck if requesting path in the same cluster as the previous time,
-				//try to avoid blockades this time
-				mapLayer.CreateIntraEdgeConcerningBlockades(startNode);
-			}
-			previousCluster = cluster;
+
+			mapLayer.CreateIntraEdgeConcerningBlockades(startNode);
+
 			mapLayer.addBorderNode(startNode);
 		}
 
@@ -112,19 +106,19 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 		}
 
 		while(!priorityQueue.isEmpty()){
-			
+
 			Path cheapestPath = priorityQueue.poll();
-			
+
 			//Check if a a path to a goalnode is found
 			for(Area goal : goalAreas){
 				if(cheapestPath.dest == goal){
 
 					removeTempBorders(startNode, goals, tempPaths, borderNodes);
-
+				//	System.out.println("path is found!");
 					return cheapestPath.path;
 				}
 			}
-			
+
 			//Get bordernode from cheapestpath
 			BorderNode cheapestNode = null;
 			for(BorderNode temp : borderNodes){
@@ -155,7 +149,7 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 								break;
 							}
 						}
-						
+
 						//Add new..
 						checked.add(new CheckedArea(length, p.dest.getID()));				
 
@@ -171,6 +165,7 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 		}
 
 		removeTempBorders(startNode, goals, tempPaths, borderNodes);
+		//System.out.println("path is not found!");
 
 		return null;
 	}
@@ -252,6 +247,11 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 				returnArray.add(temp.get(i).getID());
 			}
 		}
+		
+		if(returnArray.isEmpty()){
+			return null;
+		}
+		
 		return returnArray;
 	}
 
@@ -272,7 +272,11 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 				returnArray.add(temp.get(i).getID());
 			}
 		}
-
+		
+		if(returnArray.isEmpty()){
+			return null;
+		}
+		
 		return returnArray;
 	}
 

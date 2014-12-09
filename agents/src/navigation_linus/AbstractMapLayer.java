@@ -50,7 +50,7 @@ public class AbstractMapLayer extends StandardViewLayer{
 		graphics2d = g;
 
 		Collection<RenderedObject> objects = new HashSet<RenderedObject>(); 
-
+		/*
 		g.setColor(Color.green);
 		for(BorderNode b : borderNodes){
 			Ellipse2D.Double currentDot = new Ellipse2D.Double(arg1.xToScreen(
@@ -58,18 +58,15 @@ public class AbstractMapLayer extends StandardViewLayer{
 			g.fill(currentDot);
 			objects.add(new RenderedObject(null, currentDot)); 
 		}
-		/*
+
 		EntityID eId = new EntityID(31109);
-		EntityID goalID = new EntityID(3759);
+		EntityID goalID = new EntityID(35294);
 
 		HPAstar astar = new HPAstar(model, borderNodes, this);
 		ArrayList<EntityID> path = (ArrayList<EntityID>) astar.performSearch(eId, 
-				eId);
-
-		path = (ArrayList<EntityID>) astar.performSearch(eId, 
 				goalID);
 		printPath(path);
-		 */
+*/
 		return objects;
 	}
 
@@ -110,17 +107,20 @@ public class AbstractMapLayer extends StandardViewLayer{
 		if(!pArray.isEmpty()){ //Means that at least one path is found
 
 			for(Path p : pArray){
-				int totCostToClear = 1;
+				int largestBlockade = 1;
 				for(Area a : p.path){
 					if(a.getBlockades() != null){
 						for(EntityID e : a.getBlockades()){
 							Blockade b = (Blockade) model.getEntity(e);
-							totCostToClear += b.getRepairCost();
+							int blockadeCost = b.getRepairCost();
+							if(largestBlockade < blockadeCost){
+								largestBlockade = blockadeCost;
+							}
 						}
 					}
 				}
-				//Length multiplied by the cost to clear this path
-				p.length = p.length*totCostToClear;
+				//Length multiplied by the cost to clear the most expensive road on this path
+				p.length = p.length*largestBlockade;
 			}
 
 			borderNode.neighbors.addAll(pArray);
@@ -317,7 +317,7 @@ public class AbstractMapLayer extends StandardViewLayer{
 
 		ArrayList<Line2D.Double> lineList = new ArrayList<Line2D.Double>();
 		ArrayList<Line2D.Double> borderLines = new ArrayList<Line2D.Double>();
-		ArrayList<Road> borderRoads = new ArrayList<Road>();
+		ArrayList<Area> borderAreas = new ArrayList<Area>();
 
 		meshArrayRectangles = new ArrayList<Rectangle2D>();
 		borderNodes = new ArrayList<BorderNode>();
@@ -361,11 +361,11 @@ public class AbstractMapLayer extends StandardViewLayer{
 
 		//Create interedges
 		for (Entity entity : model.getAllEntities()) {
-			if(entity instanceof Road){
-				for(EntityID neighborId : ((Road) entity).getNeighbours()){
+			if(entity instanceof Area){
+				for(EntityID neighborId : ((Area) entity).getNeighbours()){
 					if(model.getEntity(neighborId) instanceof Road){
-						Road neighborRoad = (Road) model.getEntity(neighborId);
-						Road currentRoad = (Road) entity;
+						Area neighborRoad = (Area) model.getEntity(neighborId);
+						Area currentRoad = (Area) entity;
 
 						//Create line between roads
 						Line2D.Double line2 = new Line2D.Double(currentRoad.getX(),
@@ -376,12 +376,12 @@ public class AbstractMapLayer extends StandardViewLayer{
 						for(int i = 0; i < lineList.size();i++){
 							if(line2.intersectsLine(lineList.get(i))){
 								borderLines.add(line2);
-								if(!borderRoads.contains(currentRoad)){
-									borderRoads.add(currentRoad);
+								if(!borderAreas.contains(currentRoad)){
+									borderAreas.add(currentRoad);
 								}
 
-								if(!borderRoads.contains(neighborRoad)){
-									borderRoads.add(neighborRoad);
+								if(!borderAreas.contains(neighborRoad)){
+									borderAreas.add(neighborRoad);
 								}
 
 								int length = model.getDistance(currentRoad.getID(), neighborRoad.getID());
@@ -414,12 +414,12 @@ public class AbstractMapLayer extends StandardViewLayer{
 		}
 
 		int cluster = 0;
-		for(Road r : borderRoads){
-			cluster = getCluster(r);
-			BorderNode newBorderNode = new BorderNode(cluster, r);
+		for(Area a : borderAreas){
+			cluster = getCluster(a);
+			BorderNode newBorderNode = new BorderNode(cluster, a);
 			borderNodes.add(newBorderNode);
 			for(Path p : interEdges){
-				if(p.start == r){
+				if(p.start == a){
 					newBorderNode.neighbors.add(p);
 				}
 			}
