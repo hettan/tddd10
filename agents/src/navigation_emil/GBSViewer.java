@@ -34,7 +34,9 @@ import sample.SampleSearch;
 import sample.SearchAlgorithm;
 
 /**
-   A simple viewer.
+ * A viewer for testing functionality in the navigation_emil package
+ * @author emiol791
+ *
  */
 public class GBSViewer extends StandardViewer {
     private static final int DEFAULT_FONT_SIZE = 20;

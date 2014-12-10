@@ -19,6 +19,14 @@ import rescuecore2.standard.entities.StandardWorldModel;
 import rescuecore2.worldmodel.EntityID;
 import sample.SearchAlgorithm;
 
+/**
+ * A concrete SearchAlgorithm that performs A* search in a StandardWorldModel to find the best path between nodes of type EntityID.
+ * Its special feature is that it utilizes a GridRelaxation to quickly be able to construct long paths. Its down-sides are that
+ * it takes quite a while to initialize, and it caches all the sub paths, making it consume quite a bit of memory.
+ * 
+ * @author emiol791
+ *
+ */
 public class GridBasedSearch implements SearchAlgorithm {
 
 	private StandardWorldModel model;
@@ -56,7 +64,19 @@ public class GridBasedSearch implements SearchAlgorithm {
 		if(!(startEntity instanceof Area)) return new ArrayList<EntityID>();
 		if(!(goalEntity instanceof Area)) return new ArrayList<EntityID>();
 		
-		PathLenTuple<Area> path = doGridSearch((Area)startEntity, (Area)goalEntity);
+		PathLenTuple<Area> path = null;
+		Area startArea = (Area)startEntity;
+		Area goalArea = (Area)goalEntity;
+		
+		if(worldRelax.getBoxAtWorldCoord(startArea.getX(), startArea.getY())
+				.getRectangle().contains(goalArea.getX(), goalArea.getY())) {
+			
+			// Start and end are very close, use regular A*
+			path = doAreaSearch(startArea, goalArea);
+		} else {
+			// They are a bit apart, use relaxation
+			path = doGridSearch(startArea, goalArea);
+		}
 		
 		List<EntityID> result = new ArrayList<EntityID>();
 		for(Area area : path.getPath()) {
@@ -65,8 +85,6 @@ public class GridBasedSearch implements SearchAlgorithm {
 		return result;
 	}
 	
-	// This one is still kept here to add possibility to quickly find short paths
-	@SuppressWarnings("unused")
 	private PathLenTuple<Area> doAreaSearch(Area start, Area goal) {
 		SearchArea startArea = new SearchArea(start, model, null);
 		startArea.setAvoidBlocks(true);

@@ -15,6 +15,13 @@ import rescuecore2.standard.entities.StandardWorldModel;
 import rescuecore2.worldmodel.EntityID;
 import sample.SearchAlgorithm;
 
+/**
+ * A concrete SearchAlgorithm that performs A* search in a StandardWorldModel to find the best path between nodes of type EntityID.
+ * Its special feature is that it avoids path that are blocked by Blockades.
+ * 
+ * @author emiol791
+ *
+ */
 public class AvoidBlockadeSearch implements SearchAlgorithm {
 
 	StandardWorldModel model;
@@ -100,6 +107,9 @@ public class AvoidBlockadeSearch implements SearchAlgorithm {
 	@Override
 	public List<EntityID> getRemainingPath(List<EntityID> path,
 			EntityID currentArea) {
+		
+		// The standard approach, saves a little time
+		/*
 		List<EntityID> result = new ArrayList<EntityID>();
 		boolean passedCurrent = false;
 		for(int i = 0; i < path.size(); i++) {
@@ -108,6 +118,12 @@ public class AvoidBlockadeSearch implements SearchAlgorithm {
 			if(passedCurrent)
 				result.add(path.get(i));
 		}
+		*/
+		
+		// Calculates a new path, which avoids any blockades that might have been found.
+		EntityID goal = path.get(path.size() - 1);
+		List<EntityID> result = performSearch(currentArea, goal);
+		
 		return result;
 	}
 
