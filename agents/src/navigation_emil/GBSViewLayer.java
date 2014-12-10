@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
@@ -21,6 +20,11 @@ import rescuecore2.view.AbstractViewLayer;
 import rescuecore2.view.RenderedObject;
 import rescuecore2.worldmodel.EntityID;
 
+/**
+ * A view layer for testing functionality in the navigation_emil package
+ * @author emiol791
+ *
+ */
 public class GBSViewLayer extends AbstractViewLayer {
 
 	List<Area> gates;
@@ -120,14 +124,12 @@ public class GBSViewLayer extends AbstractViewLayer {
 				isFirst = false;
 				oldX = x;
 				oldY = y;
-				double blockadeArea = 0;
 				double[] coords = new double[6];
 				if(id.getValue() == path.get(path.size() - 1).getValue()) {
 					if(area.getBlockades() != null) {
 						for(EntityID bId : area.getBlockades()) {
 							Shape bShape = ((Blockade) model.getEntity(bId)).getShape();
 							double bArea = MathUtils.areaOfShape(bShape);
-							blockadeArea += bArea;
 							System.out.println("Area of blockade " + bId.getValue() + " is " + formatter.format(bArea));
 							PathIterator bPI = bShape.getPathIterator(null);
 							int sX=0, sY=0;

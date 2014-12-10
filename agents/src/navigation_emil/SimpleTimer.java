@@ -3,14 +3,16 @@ package navigation_emil;
 import java.text.DecimalFormat;
 
 /**
+ * A static timer for fast and simple time measurement.
+ * <br><br>
+ * Use:<br>
+ * {@code
+ * SimpleTimer.reset("Time to do work: ");
+ * // Do work
+ * SimpleTimer.printTime();
+ * }
  * 
  * @author emiol791
- * A static timer for fast and simple time measurement.
- * 
- * Use:
- * SimpleTimer.reset("Time to do work: ");
- * //Do work
- * SimpleTimer.printTime();
  */
 public class SimpleTimer {
 	private static long startTime = System.currentTimeMillis();
