@@ -66,7 +66,7 @@ public class AbstractMapLayer extends StandardViewLayer{
 		ArrayList<EntityID> path = (ArrayList<EntityID>) astar.performSearch(eId, 
 				goalID);
 		printPath(path);
-*/
+		 */
 		return objects;
 	}
 
@@ -109,16 +109,18 @@ public class AbstractMapLayer extends StandardViewLayer{
 			for(Path p : pArray){
 				int largestBlockade = 1;
 				for(Area a : p.path){
+					int currentBlockade = 1;
 					if(a.getBlockades() != null){
 						for(EntityID e : a.getBlockades()){
 							Blockade b = (Blockade) model.getEntity(e);
-							int blockadeCost = b.getRepairCost();
-							if(largestBlockade < blockadeCost){
-								largestBlockade = blockadeCost;
-							}
+							currentBlockade += b.getRepairCost();
 						}
 					}
+					if(largestBlockade < currentBlockade){
+						largestBlockade = currentBlockade;
+					}
 				}
+
 				//Length multiplied by the cost to clear the most expensive road on this path
 				p.length = p.length*largestBlockade;
 			}
