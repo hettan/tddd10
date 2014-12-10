@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 
+import exploration.ExplorationAgent;
+
 import rescuecore2.worldmodel.EntityID;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.messages.Command;
@@ -22,7 +24,7 @@ import rescuecore2.standard.entities.FireBrigade;
 /**
    A sample fire brigade agent.
  */
-public class SampleFireBrigade extends AbstractSampleAgent<FireBrigade> {
+public class SampleFireBrigade extends ExplorationAgent<FireBrigade> {//AbstractSampleAgent<FireBrigade> {
     private static final String MAX_WATER_KEY = "fire.tank.maximum";
     private static final String MAX_DISTANCE_KEY = "fire.extinguish.max-distance";
     private static final String MAX_POWER_KEY = "fire.extinguish.max-sum";
@@ -65,7 +67,7 @@ public class SampleFireBrigade extends AbstractSampleAgent<FireBrigade> {
         // Are we out of water?
         if (me.isWaterDefined() && me.getWater() == 0) {
             // Head for a refuge
-            List<EntityID> path = search.breadthFirstSearch(me().getPosition(), refugeIDs);
+            List<EntityID> path = search.performSearch(me().getPosition(), refugeIDs);
             if (path != null) {
                 Logger.info("Moving to refuge");
                 sendMove(time, path);
@@ -133,6 +135,6 @@ public class SampleFireBrigade extends AbstractSampleAgent<FireBrigade> {
         if (targets.isEmpty()) {
             return null;
         }
-        return search.breadthFirstSearch(me().getPosition(), objectsToIDs(targets));
+        return search.performSearch(me().getPosition(), objectsToIDs(targets));
     }
 }
