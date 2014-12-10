@@ -36,10 +36,9 @@ public class CustomLayer extends StandardViewLayer {
 	
 	public CustomLayer(StandardWorldModel model) {
 		this.model = model;
-		Partitioning part = new Partitioning(model);
-		clusters = part.getClustersKMeans();
-		agentsAssignment = part.getAgentAssigment();
-		
+		//Partitioning part = new Partitioning(model);
+		//clusters = part.getClustersKMeans();
+		//agentsAssignment = part.getAgentAssigment();
 		colors = new ArrayList<Color>();
 		colors.add(Color.pink);
 		colors.add(Color.yellow);
@@ -63,29 +62,32 @@ public class CustomLayer extends StandardViewLayer {
 	@Override
 	public Collection<RenderedObject> render(Graphics2D g,
 			ScreenTransform arg1, int arg2, int arg3) { 
-		
+		clusters = Partitioning.clusters;
+		agentsAssignment = Partitioning.lastAgentAssignment;
 		Collection<RenderedObject> objects = new HashSet<RenderedObject>(); 
-		for(int i=0; i<clusters.size(); i++) {
-			g.setColor(colors.get(i % colors.size()));
-			List<EntityID> cluster = clusters.get(i);
-			for(EntityID eID : cluster) {
-				Pair<Integer, Integer> pos = model.getEntity(eID).getLocation(model);
+		if(clusters != null && agentsAssignment != null) {	
+			for(int i=0; i<clusters.size(); i++) {
+				g.setColor(colors.get(i % colors.size()));
+				List<EntityID> cluster = clusters.get(i);
+				for(EntityID eID : cluster) {
+					Pair<Integer, Integer> pos = model.getEntity(eID).getLocation(model);
+					Ellipse2D.Double dot = new Ellipse2D.Double(
+							arg1.xToScreen(pos.first()),
+							arg1.yToScreen(pos.second()), 10, 10);
+					g.fill(dot);
+					objects.add(new RenderedObject(null, dot));
+				}
+			}
+			
+			for(int i=0; i<agentsAssignment.size(); i++) {
+				g.setColor(colors.get(i % colors.size()));
+				Pair<Integer, Integer> pos = model.getEntity(agentsAssignment.get(i)).getLocation(model);
 				Ellipse2D.Double dot = new Ellipse2D.Double(
-						arg1.xToScreen(pos.first()),
-						arg1.yToScreen(pos.second()), 10, 10);
+						arg1.xToScreen(pos.first()-15000),
+						arg1.yToScreen(pos.second()+15000), 30, 30);
 				g.fill(dot);
 				objects.add(new RenderedObject(null, dot));
 			}
-		}
-		
-		for(int i=0; i<agentsAssignment.size(); i++) {
-			g.setColor(colors.get(i % colors.size()));
-			Pair<Integer, Integer> pos = model.getEntity(agentsAssignment.get(i)).getLocation(model);
-			Ellipse2D.Double dot = new Ellipse2D.Double(
-					arg1.xToScreen(pos.first()-15000),
-					arg1.yToScreen(pos.second()+15000), 30, 30);
-			g.fill(dot);
-			objects.add(new RenderedObject(null, dot));
 		}
 		/*for (StandardEntity entity : 
         	model.getEntitiesOfType(StandardEntityURN.POLICE_FORCE, 
