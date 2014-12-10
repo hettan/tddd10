@@ -3,6 +3,7 @@ package sample;
 import java.io.IOException;
 
 import exploration.CustomLayer;
+import navigation_emil.GBSViewer;
 
 import rescuecore2.components.ComponentLauncher;
 import rescuecore2.components.TCPComponentLauncher;
@@ -63,6 +64,7 @@ public final class LaunchSampleAgents {
                 }
             }
             // CHECKSTYLE:ON:ModifiedControlVariable
+            System.out.println("Host: " + host + ":" + port + "\nConfig: " + config);
             ComponentLauncher launcher = new TCPComponentLauncher(host, port, config);
             connect(launcher, fb, pf, at, config);
         }

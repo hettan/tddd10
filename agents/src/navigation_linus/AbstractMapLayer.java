@@ -13,6 +13,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import rescuecore2.misc.gui.ScreenTransform;
 import rescuecore2.standard.entities.Area;
+import rescuecore2.standard.entities.Blockade;
 import rescuecore2.standard.entities.Road;
 import rescuecore2.standard.entities.StandardWorldModel;
 import rescuecore2.standard.view.StandardViewLayer; 
@@ -49,7 +50,7 @@ public class AbstractMapLayer extends StandardViewLayer{
 		graphics2d = g;
 
 		Collection<RenderedObject> objects = new HashSet<RenderedObject>(); 
-	
+		/*
 		g.setColor(Color.green);
 		for(BorderNode b : borderNodes){
 			Ellipse2D.Double currentDot = new Ellipse2D.Double(arg1.xToScreen(
@@ -57,15 +58,15 @@ public class AbstractMapLayer extends StandardViewLayer{
 			g.fill(currentDot);
 			objects.add(new RenderedObject(null, currentDot)); 
 		}
-	/*	
-		EntityID eId = new EntityID(33425);
-		EntityID goalID = new EntityID(32681);
+
+		EntityID eId = new EntityID(31109);
+		EntityID goalID = new EntityID(35294);
 
 		HPAstar astar = new HPAstar(model, borderNodes, this);
 		ArrayList<EntityID> path = (ArrayList<EntityID>) astar.performSearch(eId, 
 				goalID);
 		printPath(path);
-*/
+		 */
 		return objects;
 	}
 
@@ -91,6 +92,41 @@ public class AbstractMapLayer extends StandardViewLayer{
 		if(!pArray.isEmpty()){ //Means that at least one path is found
 			borderNode.neighbors.addAll(pArray);
 		}
+
+		return pArray;
+	}
+
+	/**
+	 * Create all intra-edges for one single bordernode with blockades in considerations
+	 * @param borderNode
+	 * @return
+	 */
+	public ArrayList<Path> CreateIntraEdgeConcerningBlockades(BorderNode borderNode){
+
+		ArrayList<Path>  pArray = breathFirstSearch(borderNode.road, borderNode.cluster, null);
+		if(!pArray.isEmpty()){ //Means that at least one path is found
+
+			for(Path p : pArray){
+				int largestBlockade = 1;
+				for(Area a : p.path){
+					int currentBlockade = 1;
+					if(a.getBlockades() != null){
+						for(EntityID e : a.getBlockades()){
+							Blockade b = (Blockade) model.getEntity(e);
+							currentBlockade += b.getRepairCost();
+						}
+					}
+					if(largestBlockade < currentBlockade){
+						largestBlockade = currentBlockade;
+					}
+				}
+
+				p.length = p.length + largestBlockade*10000;
+			}
+
+			borderNode.neighbors.addAll(pArray);
+		}
+
 		return pArray;
 	}
 
@@ -117,7 +153,6 @@ public class AbstractMapLayer extends StandardViewLayer{
 		for(Path p : list){
 			b.neighbors.remove(p);
 		}
-		//System.out.println("nr of neighbours to bordernode " + b.road.getID() + " is "+ b.neighbors.size());
 	}
 
 	boolean isBorderNode(Area a){
@@ -274,8 +309,8 @@ public class AbstractMapLayer extends StandardViewLayer{
 		} else {
 			System.out.println("path not found");
 		}
-		
-		
+
+
 	}
 
 
@@ -283,8 +318,8 @@ public class AbstractMapLayer extends StandardViewLayer{
 
 		ArrayList<Line2D.Double> lineList = new ArrayList<Line2D.Double>();
 		ArrayList<Line2D.Double> borderLines = new ArrayList<Line2D.Double>();
-		ArrayList<Road> borderRoads = new ArrayList<Road>();
-		
+		ArrayList<Area> borderAreas = new ArrayList<Area>();
+
 		meshArrayRectangles = new ArrayList<Rectangle2D>();
 		borderNodes = new ArrayList<BorderNode>();
 		interEdges= new ArrayList<Path>();
@@ -327,11 +362,11 @@ public class AbstractMapLayer extends StandardViewLayer{
 
 		//Create interedges
 		for (Entity entity : model.getAllEntities()) {
-			if(entity instanceof Road){
-				for(EntityID neighborId : ((Road) entity).getNeighbours()){
+			if(entity instanceof Area){
+				for(EntityID neighborId : ((Area) entity).getNeighbours()){
 					if(model.getEntity(neighborId) instanceof Road){
-						Road neighborRoad = (Road) model.getEntity(neighborId);
-						Road currentRoad = (Road) entity;
+						Area neighborRoad = (Area) model.getEntity(neighborId);
+						Area currentRoad = (Area) entity;
 
 						//Create line between roads
 						Line2D.Double line2 = new Line2D.Double(currentRoad.getX(),
@@ -342,12 +377,12 @@ public class AbstractMapLayer extends StandardViewLayer{
 						for(int i = 0; i < lineList.size();i++){
 							if(line2.intersectsLine(lineList.get(i))){
 								borderLines.add(line2);
-								if(!borderRoads.contains(currentRoad)){
-									borderRoads.add(currentRoad);
+								if(!borderAreas.contains(currentRoad)){
+									borderAreas.add(currentRoad);
 								}
 
-								if(!borderRoads.contains(neighborRoad)){
-									borderRoads.add(neighborRoad);
+								if(!borderAreas.contains(neighborRoad)){
+									borderAreas.add(neighborRoad);
 								}
 
 								int length = model.getDistance(currentRoad.getID(), neighborRoad.getID());
@@ -367,7 +402,7 @@ public class AbstractMapLayer extends StandardViewLayer{
 				}
 			}
 		}
-		
+
 		//Create meshArray Rectangles
 		for(int x = left; x < right; x += width/4 +1 ){
 			for(int y = bottom; y < top; y += height/4 +1){
@@ -378,19 +413,19 @@ public class AbstractMapLayer extends StandardViewLayer{
 				meshArrayRectangles.add(rectangle);
 			}
 		}
-		
+
 		int cluster = 0;
-		for(Road r : borderRoads){
-			cluster = getCluster(r);
-			BorderNode newBorderNode = new BorderNode(cluster, r);
+		for(Area a : borderAreas){
+			cluster = getCluster(a);
+			BorderNode newBorderNode = new BorderNode(cluster, a);
 			borderNodes.add(newBorderNode);
 			for(Path p : interEdges){
-				if(p.start == r){
+				if(p.start == a){
 					newBorderNode.neighbors.add(p);
 				}
 			}
 		}
-		
+
 		CreateIntraEdges();
 	}
 }
