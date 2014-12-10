@@ -5,10 +5,12 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
+
 import communication.CommunicationDevice;
 import communication.CommunicationFactory;
 import communication.CommunicationType;
 import communication.Message;
+
 import rescuecore2.messages.Command;
 import rescuecore2.misc.Pair;
 import rescuecore2.standard.components.StandardAgent;

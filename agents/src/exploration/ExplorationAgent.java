@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 import communication.CommunicationDevice;
 import communication.CommunicationFactory;
@@ -27,6 +30,7 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 	
 	private List<EntityID> assignedEntities;
 	private List<EntityID> unexploredEntities;
+	private Queue<EntityID> explorationCircuit;
 	private HashMap<EntityID, Float> utility;
 	private HashMap<EntityID, Float> costs;
 	private CommunicationDevice communication;
@@ -35,6 +39,7 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 	
 	public ExplorationAgent() {
 		assignedEntities = new ArrayList<EntityID>();
+		explorationCircuit = new LinkedList<EntityID>();
 		utility = new HashMap<EntityID, Float>();
 		communication = CommunicationFactory.createCommunicationDevice();
 		communication.register(CommunicationGroup.ALL);
@@ -58,12 +63,22 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 		handleAssignmentMessages(assignmentMessages);
 		
 		if(atDestination()) {
-			System.out.println("atDestination");
-			unexploredEntities.remove(currDst.get(0));
-			currDst.clear();
+			
+			//Re-add to the circuit
+			
+			if(unexploredEntities.size() > 0) {
+				EntityID done = currDst.get(0);
+				explorationCircuit.add(done);
+				unexploredEntities.remove(done);	
+				currDst.clear();
+			}
+			else {
+				System.out.println("in circuit mode");
+			}
+			
 		}
 		
-		System.out.println("UnexploredEntities = " + unexploredEntities.size());
+		//System.out.println("UnexploredEntities = " + unexploredEntities.size());
 		
 	}
 	
@@ -116,10 +131,7 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 	protected List<EntityID> explore() {
 		List<EntityID> path = null;
 		if(currDst.size() == 0) {
-			if(unexploredEntities.size() == 0) {
-				System.out.println("All buildings explored");
-				return null;
-			}
+				
 			List<EntityID> checked = new ArrayList<EntityID>();
 		
 			//Make sure the path is reachable otherwise pick a new destination
@@ -129,16 +141,18 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 				checked.add(currDst.get(0));
 				path = search.performSearch(((Human)me()).getPosition(), currDst);
 			}
-			System.out.println("dst to " +currDst.get(0).getValue());
+			//System.out.println("dst to " +currDst.get(0).getValue());
 			//Reduce utility of close entities <(reduceUtilDist)
-			for(EntityID entity : assignedEntities) {
-				if ((model.getDistance(currDst.get(0), entity) < reduceUtilDist)) {                                                                                                                                                                        
-					updateUtility(entity, currDst.get(0));                                                                                                                                                                                         
+			if(unexploredEntities.size() > 0) {
+				for(EntityID entity : assignedEntities) {
+					if ((model.getDistance(currDst.get(0), entity) < reduceUtilDist)) {                                                                                                                                                                        
+						updateUtility(entity, currDst.get(0));                                                                                                                                                                                         
+					}
 				}
 			}
 		}
 		else {
-			System.out.println("Still finding dst " + model.getEntity(currDst.get(0)).getLocation(model).toString() + "   -   " + me().getLocation(model).toString());
+			//System.out.println("Still finding dst " + model.getEntity(currDst.get(0)).getLocation(model).toString() + "   -   " + me().getLocation(model).toString());
 			path = search.performSearch(((Human)me()).getPosition(), currDst);
 		}
 		return path;
@@ -147,6 +161,21 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 	//Next entity to explore, will need some kind of time factor for this to work. I don't want to stop exploring an entity after a one time visit.
 	private EntityID getNextExplore(List<EntityID> checked) {
 		EntityID next = null;
+		
+		//Poll from the circuit 
+        if(unexploredEntities.size() == 0) {
+        	next = explorationCircuit.poll();
+        	explorationCircuit.add(next);
+        	return next;
+        }
+        //If none of the entities in unexploredEntities can be reached, start walking on the circuit instead.
+        if(checked.size() == unexploredEntities.size()) {
+         	next = explorationCircuit.poll();
+        	explorationCircuit.add(next);
+        	return next;
+        }
+        
+        //Circuit not yet done, need to find the next best dst entity
         Float bestTotal = Float.NEGATIVE_INFINITY;
         for(EntityID entity: unexploredEntities) {
         	//Util - cost
