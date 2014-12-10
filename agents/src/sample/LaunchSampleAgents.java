@@ -91,6 +91,7 @@ public final class LaunchSampleAgents {
             }
         }
         catch (ComponentConnectionException e) {
+        	System.out.println("failed connecting fire"+ e.getMessage());
             Logger.info("failed: " + e.getMessage());
         }
         try {
@@ -101,6 +102,7 @@ public final class LaunchSampleAgents {
             }
         }
         catch (ComponentConnectionException e) {
+        	System.out.println("failed connecting police"+ e.getMessage());
             Logger.info("failed: " + e.getMessage());
         }
         try {
@@ -112,20 +114,21 @@ public final class LaunchSampleAgents {
             }
         }
         catch (ComponentConnectionException e) {
+        	System.out.println("failed connecting ambulance"+ e.getMessage());
             Logger.info("failed: " + e.getMessage());
         }
-//        try {
-//            while (true) {
-//                Logger.info("Connecting centre " + (i++) + "...");
-//                launcher.connect(new AmbulanceCentre());
-//                System.out.println("Ambulance centre connected");
-//                Logger.info("success");
-//            }
-//        }
-//        catch (ComponentConnectionException e) {
-//        	System.out.println("failed connecting");
-//            Logger.info("failed: " + e.getMessage());
-//        }
+        try {
+            while (true) {
+                Logger.info("Connecting centre " + (i++) + "...");
+                launcher.connect(new AmbulanceCentre());
+                System.out.println("Ambulance centre connected");
+                Logger.info("success");
+            }
+        }
+        catch (ComponentConnectionException e) {
+        	System.out.println("failed connecting"+ e.getMessage());
+            Logger.info("failed: " + e.getMessage());
+        }
         try {
             while (true) {
                 Logger.info("Connecting centre " + (i++) + "...");
@@ -135,7 +138,7 @@ public final class LaunchSampleAgents {
             }
         }
         catch (ComponentConnectionException e) {
-        	System.out.println("Sample failed connecting");
+        	System.out.println("Sample failed connecting"+ e.getMessage());
             Logger.info("failed: " + e.getMessage());
         }
         try {
