@@ -19,7 +19,7 @@ public class ExplorationCentre extends StandardAgent<Building>{
 	private List<EntityID> agents;
 	private static boolean first = true;
 	public List<List<EntityID>> clusters;
-	
+
 	@Override
     protected void postConnect() {
             super.postConnect();
@@ -31,8 +31,7 @@ public class ExplorationCentre extends StandardAgent<Building>{
             		StandardEntityURN.HYDRANT,
             		StandardEntityURN.GAS_STATION,
             		StandardEntityURN.BUILDING);
-            System.out.println("myID = "+this.getID());
-            agents = new ArrayList<EntityID>();
+            
             for (StandardEntity entity : 
             	model.getEntitiesOfType(StandardEntityURN.POLICE_FORCE, 
             			StandardEntityURN.FIRE_BRIGADE,
@@ -46,7 +45,7 @@ public class ExplorationCentre extends StandardAgent<Building>{
 	            	System.out.println((model.getEntity(id)).getLocation(model));
 	            }
             }
-            //clusters = getClusters(agents, 4);
+            List<List<EntityID>> clusters = getClusters(agents, 4);
     }
 	
 	private List<List<EntityID>> getClusters(List<EntityID> entities, int numClusters) {
