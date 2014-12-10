@@ -14,7 +14,8 @@ import java.text.DecimalFormat;
  */
 public class SimpleTimer {
 	private static long startTime = System.currentTimeMillis();
-	private static DecimalFormat formatter = new DecimalFormat("#0.00");
+	private static DecimalFormat formatter = new DecimalFormat("#0.000");
+	private static int previousTime = 0;
 	
 	/**
 	 * Reset the timer before measurement starts
@@ -38,8 +39,15 @@ public class SimpleTimer {
 	 */
 	public static void printTime() {
 		long currTime = System.currentTimeMillis();
-		int dt = (int) (currTime - startTime);
-		double s = (double)dt / 1000.0;
+		previousTime = (int) (currTime - startTime);
+		double s = (double)previousTime / 1000.0;
 		System.out.println(formatter.format(s)+"s");
+	}
+	
+	/**
+	 * @return The last measured time span in milliseconds
+	 */
+	public static int getPreviousTimeMillis() {
+		return previousTime;
 	}
 }

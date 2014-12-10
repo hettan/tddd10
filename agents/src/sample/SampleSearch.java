@@ -142,4 +142,12 @@ public final class SampleSearch implements SearchAlgorithm {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
+	@Override
+	public List<EntityID> getRemainingPath(List<EntityID> path,
+			EntityID currentArea) {
+		// TODO Auto-generated method stub
+		return path;
+	}
 }
