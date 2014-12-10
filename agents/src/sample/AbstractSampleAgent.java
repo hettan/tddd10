@@ -33,7 +33,7 @@ public abstract class AbstractSampleAgent<E extends StandardEntity> extends Stan
     /**
        The search algorithm.
     */
-    protected SampleSearch search;
+    protected SearchAlgorithm search;
 
     /**
        Whether to use AKSpeak messages or not.

@@ -74,7 +74,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 		// if the agent has already a task where to go
 		if (goal != null) {
 			System.out.println("Ambulance have a goal");
-			List<EntityID> path = search.breadthFirstSearch(location().getID(),
+			List<EntityID> path = search.performSearch(location().getID(),
 					goal);
 			if (path.size() == 1) {
 				Logger.error("Done with reaching");
@@ -137,7 +137,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 			else
 			{
 				// Move to a refuge
-				List<EntityID> path = search.breadthFirstSearch(me()
+				List<EntityID> path = search.performSearch(me()
 						.getPosition(), refugeIDs);
 				if (path != null) {
 					Logger.info("Moving to refuge" + targetHuman);
@@ -180,7 +180,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 				}
 			} else {
 				// Try to move to the target
-				List<EntityID> path = search.breadthFirstSearch(me()
+				List<EntityID> path = search.performSearch(me()
 						.getPosition(), next.getPosition());
 				if (path != null) {
 					Logger.info("Moving to target");
@@ -193,7 +193,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 			}
 		}
 		
-		List<EntityID> path = search.breadthFirstSearch(me().getPosition(),
+		List<EntityID> path = search.performSearch(me().getPosition(),
 				unexploredBuildings);
 		if (path != null) {
 			Logger.info("Searching buildings");

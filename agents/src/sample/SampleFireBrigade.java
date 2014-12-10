@@ -65,7 +65,7 @@ public class SampleFireBrigade extends AbstractSampleAgent<FireBrigade> {
         // Are we out of water?
         if (me.isWaterDefined() && me.getWater() == 0) {
             // Head for a refuge
-            List<EntityID> path = search.breadthFirstSearch(me().getPosition(), refugeIDs);
+            List<EntityID> path = search.performSearch(me().getPosition(), refugeIDs);
             if (path != null) {
                 Logger.info("Moving to refuge");
                 sendMove(time, path);
@@ -133,6 +133,6 @@ public class SampleFireBrigade extends AbstractSampleAgent<FireBrigade> {
         if (targets.isEmpty()) {
             return null;
         }
-        return search.breadthFirstSearch(me().getPosition(), objectsToIDs(targets));
+        return search.performSearch(me().getPosition(), objectsToIDs(targets));
     }
 }
