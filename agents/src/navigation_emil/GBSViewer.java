@@ -30,7 +30,6 @@ import java.text.NumberFormat;
 
 import rescuecore2.standard.components.StandardViewer;
 import rescuecore2.standard.entities.Area;
-import rescuecore2.standard.entities.Blockade;
 import sample.SampleSearch;
 import sample.SearchAlgorithm;
 

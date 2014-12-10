@@ -48,7 +48,6 @@ public class AStarAlgorithm {
 				current = current.getParent();
 			}
 		}
-		
 		return result;
 	}
 	
@@ -60,11 +59,9 @@ public class AStarAlgorithm {
 		}
 		public void addPathElement(T element) {
 			path.add(element);
-			setLength(0);
 		}
 		public void addPathElement(int atIndex, T element) {
 			path.add(atIndex, element);
-			setLength(0);
 		}
 		public List<T> getPath() {
 			return path;

@@ -50,4 +50,11 @@ public interface SearchAlgorithm {
 	 */
 	public abstract List<EntityID> getPriorityNodes();
 
+	/**
+	 * Get the remaining part of a path to the goal
+	 * @param path
+	 * @param currentEntityID
+	 * @return A part of the starting path
+	 */
+	public abstract List<EntityID> getRemainingPath(List<EntityID> path, EntityID currentArea);
 }

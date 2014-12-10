@@ -6,9 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import navigation_emil.AStarAlgorithm.PathLenTuple;
-
-import rescuecore2.misc.Pair;
 import rescuecore2.standard.entities.Area;
+import rescuecore2.standard.entities.Blockade;
 import rescuecore2.standard.entities.StandardEntity;
 import rescuecore2.standard.entities.StandardWorldModel;
 import rescuecore2.worldmodel.EntityID;
@@ -39,6 +38,12 @@ public class GridRelaxation {
 		}
 	}
 	
+	public GridBox getBoxAtWorldCoord(int worldX, int worldY) {
+		int gridX = worldX / boxWidth;
+		int gridY = worldY / boxHeight;
+		return grid[gridY*gridSize + gridX];
+	}
+	
 	private void ConnectGates(StandardWorldModel model) {
 		List<Gate> gates = getGates();
 		Gate fromGate, toGate;
@@ -52,8 +57,10 @@ public class GridRelaxation {
 						fromGate.gridBox.GridY == toGate.gridBox.GridY) {
 					// Inside same GridBox -> Internal gates
 					path = new Path(fromGate, toGate, model, fromGate.gridBox.getRectangle());
-					fromGate.internalGates.add(path);
-					toGate.internalGates.add(path.getReversedInstance());
+					if(path.hasPath()) {
+						fromGate.internalGates.add(path);
+						toGate.internalGates.add(path.getReversedInstance());
+					}
 				} else {
 					// Crossing borders, see if other gate is connected
 					for(EntityID eId : fromGate.gateArea.getNeighbours()) {
@@ -143,7 +150,7 @@ public class GridRelaxation {
 		}
 	}
 	
-	class Gate {
+	static class Gate {
 		public Gate(Area area, GridBox gridBox) {
 			gateArea = area;
 			this.gridBox = gridBox;
@@ -154,7 +161,7 @@ public class GridRelaxation {
 		public List<Path> internalGates = new ArrayList<Path>();
 	}
 	
-	class Path {
+	static class Path {
 		protected PathLenTuple<Area> mPath;
 		protected Gate fromGate, toGate;
 		public Path(Gate from, Gate to, StandardWorldModel model) {
@@ -163,12 +170,16 @@ public class GridRelaxation {
 		public Path(Gate from, Gate to, StandardWorldModel model, Rectangle limitArea) {
 			SearchArea start = new SearchArea(from.gateArea, model, limitArea);
 			SearchArea goal = new SearchArea(to.gateArea, model, limitArea);
-			mPath = AStarAlgorithm.PerformSearch(start, goal);
+			if(start != null && goal != null)
+				mPath = AStarAlgorithm.PerformSearch(start, goal);
 			fromGate = from;
 			toGate = to;
 		}
 		protected Path() {
 			
+		}
+		public boolean hasPath() {
+			return (mPath != null && mPath.getPath().size() != 0);
 		}
 		public List<Area> getPath() {
 			return mPath.getPath();
@@ -199,6 +210,7 @@ public class GridRelaxation {
 
 		StandardWorldModel model;
 		Rectangle limitationArea = null;
+		boolean avoidBlocks = false;
 		
 		public SearchArea(Area area, StandardWorldModel model, Rectangle limit) {
 			super(area, area.getID().getValue(), 0, 0, null);
@@ -224,9 +236,18 @@ public class GridRelaxation {
 			dx = baseObject.getX() - goalObject.getNodeObject().getX();
 			dy = baseObject.getY() - goalObject.getNodeObject().getY();
 			double h = Math.sqrt(dx*dx + dy*dy);
+			if(avoidBlocks) {
+				double covered = getCoverPercentage(baseObject);
+				h += h*Math.pow(covered, 3);
+			}
 			SearchArea node =  new SearchArea(baseObject, baseObject.getID().getValue(), d, h, (SearchArea)parentObject, model, limitationArea);
+			node.setAvoidBlocks(avoidBlocks);
 			node.fillChildren();
 			return node;
+		}
+		
+		public void setAvoidBlocks(boolean avoid) {
+			avoidBlocks = avoid;
 		}
 		
 		protected void fillChildren() {
@@ -236,6 +257,100 @@ public class GridRelaxation {
 					if(limitationArea == null || limitationArea.contains(((Area) se).getX(), ((Area) se).getY())) {
 						addChild((Area) se);
 					}
+				}
+			}
+		}
+		
+		protected double getCoverPercentage(Area area) {
+			double areaSum = 0;
+			if(area == null) return areaSum;
+			List<EntityID> bIds = area.getBlockades();
+			if(bIds == null) return areaSum;
+			for(EntityID id : bIds) {
+				StandardEntity bE = model.getEntity(id);
+				if(!(bE instanceof Blockade)) continue;
+				Blockade blockade = (Blockade)bE;
+				areaSum += MathUtils.areaOfShape(blockade.getShape());
+			}
+			return areaSum / MathUtils.areaOfShape(area.getShape());
+		}
+	}
+
+	public static class SearchPath extends Searchable<Path> {
+
+		StandardWorldModel model;
+		Rectangle limitationArea = null;
+		boolean avoidBlocks = false;
+		Searchable<Path> goalPath = null;
+		
+		public SearchPath(Path path, StandardWorldModel model, Rectangle limit, Searchable<Path> goal) {
+			super(path, path.toGate.gateArea.getID().getValue(), 0, 0, null);
+			this.model = model;
+			this.limitationArea = limit;
+			goalPath = goal;
+			fillChildren();
+		}
+		
+		public SearchPath(Path path, StandardWorldModel model, Rectangle limit) {
+			super(path, path.toGate.gateArea.getID().getValue(), 0, 0, null);
+			this.model = model;
+			this.limitationArea = limit;
+			fillChildren();
+		}
+		
+		public SearchPath(Path baseObject, int uniqueId, double distance,
+				double heuristic, Searchable<Path> parentNode, StandardWorldModel model, Rectangle limit) {
+			super(baseObject, uniqueId, distance, heuristic, parentNode);
+			this.model = model;
+			this.limitationArea = limit;
+			fillChildren();
+		}
+
+		@Override
+		public Searchable<Path> createNode(Path baseObject,
+				Searchable<Path> parentObject, Searchable<Path> goalObject) {
+
+			Area from = baseObject.toGate.gateArea;
+			Area to = goalObject.getNodeObject().toGate.gateArea;
+			double h = MathUtils.distance(from.getX(), from.getY(), to.getX(), to.getY());
+			SearchPath node = new SearchPath(baseObject, baseObject.toGate.gateArea.getID().getValue(),
+					parentObject.getDistance() + baseObject.getLength(), h, parentObject, model, limitationArea);
+			
+			node.goalPath = goalObject;
+			node.fillChildren();
+			return node;
+		}
+		
+		public static SearchPath CreateStartPath(Gate startGate, StandardWorldModel model, Rectangle initLimit, Searchable<Path> goal) {
+			for(Gate gate : startGate.gridBox.Gates) {
+				Path tPath = new Path(startGate, gate, model, initLimit);
+				if(tPath.hasPath()) {
+					startGate.internalGates.add(tPath);
+				}
+			}
+			Path dummy = new Path(startGate, startGate, model, initLimit);
+			return new SearchPath(dummy, model, null, goal);
+		}
+		
+		public static SearchPath CreateGoalPath(Gate goalGate, StandardWorldModel model, Rectangle limit) {
+			Path dummy = new Path(goalGate, goalGate, model, limit);
+			return new SearchPath(dummy, model, null);
+		}
+		
+		protected void fillChildren() {
+			if(goalPath != null &&
+					getNodeObject().toGate.gridBox.GridX == goalPath.getNodeObject().toGate.gridBox.GridX &&
+					getNodeObject().toGate.gridBox.GridY == goalPath.getNodeObject().toGate.gridBox.GridY) {
+				goalPath.setParent(this);
+				Path gPath = new Path(getNodeObject().toGate, goalPath.getNodeObject().toGate, model, limitationArea);
+				addChild(gPath);
+			}
+			
+			List<Path> connected = getNodeObject().toGate.internalGates;
+			connected.addAll(getNodeObject().toGate.externalGates);
+			for(Path p : connected) {
+				if(limitationArea == null || limitationArea.contains(p.toGate.gateArea.getX(), p.toGate.gateArea.getY())) {
+					addChild(p);
 				}
 			}
 		}
