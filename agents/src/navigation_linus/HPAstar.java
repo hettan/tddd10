@@ -289,4 +289,23 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 		}
 		return returnArray;
 	}
+
+	/**
+	 * Sorry I had to edit in your file. But I felt i had to do this so I could keep the master branch in a working state ;)
+	 * Regards,
+	 * Emil
+	 */
+	@Override
+	public List<EntityID> getRemainingPath(List<EntityID> path,
+			EntityID currentArea) {
+		List<EntityID> result = new ArrayList<EntityID>();
+		boolean passedCurrent = false;
+		for(int i = 0; i < path.size(); i++) {
+			if(path.get(i).getValue() == currentArea.getValue())
+				passedCurrent = true;
+			if(passedCurrent)
+				result.add(path.get(i));
+		}
+		return result;
+	}
 }
