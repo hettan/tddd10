@@ -131,7 +131,7 @@ public final class LaunchSampleAgents {
             }
         }
         catch (ComponentConnectionException e) {
-        	System.out.println("failed connecting"+ e.getMessage());
+        	System.out.println("failed connecting center"+ e.getMessage());
             Logger.info("failed: " + e.getMessage());
         }
         try {
@@ -156,16 +156,16 @@ public final class LaunchSampleAgents {
         catch (ComponentConnectionException e) {
             Logger.info("failed: " + e.getMessage());
         }
-        try {
-            Logger.info("Connecting viewer...");
-            //launcher.connect(new SampleViewer());
-            System.out.println("Connecting viewer...");
-            launcher.connect(new GBSViewer());
-            System.out.println("success");
-            Logger.info("success");
-        }
-        catch (ComponentConnectionException e) {
-            Logger.info("failed: " + e.getMessage());
-        }
+//        try {
+//            Logger.info("Connecting viewer...");
+//            //launcher.connect(new SampleViewer());
+//            System.out.println("Connecting viewer...");
+//            launcher.connect(new GBSViewer());
+//            System.out.println("success");
+//            Logger.info("success");
+//        }
+//        catch (ComponentConnectionException e) {
+//            Logger.info("failed: " + e.getMessage());
+//        }
     }
 }

@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import commlib.components.AbstractCSAgent;
+import commlib.task.at.RescueAreaTaskMessage;
+
 import rescuecore2.standard.messages.AKSpeak;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.worldmodel.EntityID;
@@ -20,25 +23,30 @@ import rescuecore2.log.Logger;
 import rescuecore2.standard.components.StandardAgent;
 import rescuecore2.standard.entities.AmbulanceTeam;
 import rescuecore2.standard.entities.Building;
+import rescuecore2.standard.entities.Civilian;
 import rescuecore2.standard.entities.StandardEntity;
 import rescuecore2.standard.entities.StandardEntityURN;
 import rescuecore2.standard.messages.AKSpeak;
 
 public class AmbulanceCentre extends
-StandardAgent<rescuecore2.standard.entities.AmbulanceCentre> {
+AbstractCSAgent<rescuecore2.standard.entities.AmbulanceCentre> {
 	private List<Integer> agentsWithGoal = new ArrayList<Integer>();
 	private List<Integer> civiliansLocations = new ArrayList<Integer>();
-
+	private List<AmbulanceTeamAgent> AvailableAmbulanceAgent = new ArrayList<AmbulanceTeamAgent>();
+	private List<Civilian> BuriedCivilians = new ArrayList<Civilian>();
 	private Set<EntityID> frontier = null;
 
+	protected AtTargetSelection Target;
+	
 	@Override
 	public String toString() {
 		return "Ambulance centre";
 	}
 	
 	@Override
-	protected void think(int time, ChangeSet changed, Collection<Command> heard) {
-		sendSubscribe(time, 1);
+	protected void thinking(int time, ChangeSet changed, Collection<Command> heard) {
+			// Subscribe to channel 1
+			sendSubscribe(time, 2);
 		System.out.println("Ambulance Center");
 		if (frontier == null) {
 			frontier = new HashSet<EntityID>();
@@ -48,6 +56,29 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre> {
 			}
 		}
 		List<EntityID> agents = new ArrayList<EntityID>();
+		//TO DO: receive information of agents with no task
+		//AvailableAmbulanceAgent = getAvailableagent();
+		
+		//TO DO: receive information of buriedcivilians
+		//BuriedCivilians = getburiedCivilians();		
+		
+		if(BuriedCivilians != null) {
+			//Civilian bestCivilians = Target.rescueSelection(BuriedCivilians);
+		}
+		else
+		{
+			//TO DO explore
+		}
+
+		
+//		EntityID ownerID = this.getID();
+//		EntityID atID = AvailableAmbulanceAgent.get(3).getID();
+//		EntityID[] ids = new EntityID[model.getAllEntities().size()];
+//		EntityID areas = model.getAllEntities().toArray(ids)[0];
+//		RescueAreaTaskMessage msg = new RescueAreaTaskMessage(time,ownerID,atID,
+//				areas);
+//		System.out.println("Message send: " + time);
+		
 		for (Command next : heard) {
 			try {
 				byte[] content = ((AKSpeak) next).getContent();

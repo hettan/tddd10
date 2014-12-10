@@ -8,11 +8,14 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 
+import commlib.message.RCRSCSMessage;
+
 import rescuecore2.worldmodel.EntityID;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.messages.Command;
 import rescuecore2.log.Logger;
 import rescuecore2.standard.entities.AmbulanceTeam;
+import rescuecore2.standard.entities.Building;
 import rescuecore2.standard.entities.StandardEntity;
 import rescuecore2.standard.entities.StandardEntityURN;
 import rescuecore2.standard.entities.Human;
@@ -29,6 +32,8 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 	
 	private Collection<EntityID> unexploredBuildings;
 	public Collection<EntityID> ListAmbulanceWithoutTasks;
+	
+	List<EntityID> internSeenFires = new ArrayList<EntityID>();
 
    @Override
     public String toString() {
@@ -44,7 +49,6 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 				StandardEntityURN.HYDRANT, StandardEntityURN.GAS_STATION,
 				StandardEntityURN.BUILDING);
 		unexploredBuildings = new HashSet<EntityID>(buildingIDs);
-		//ListAmbulanceWithoutTasks = new HashSet<EntityID>(StandardEntityURN.AMBULANCE_TEAM);
 	}
 	
 	@Override
@@ -57,12 +61,65 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 	EntityID goal = null;
 
 	@Override
-	protected void think(int time, ChangeSet changed, Collection<Command> heard) {
+	protected void thinking(int time, ChangeSet changed, Collection<Command> heard) {
 		if (time == config
 				.getIntValue(kernel.KernelConstants.IGNORE_AGENT_COMMANDS_KEY)) {
 			// Subscribe to channel 1
 			sendSubscribe(time, 2);
+			//setMessageChannel(1);
 		}
+		//RCRSCSMessage msg1 = receivedMessageList.get(0);
+		//System.out.println("Message: " + msg1.getSendTime());
+
+		for(EntityID next : changed.getChangedEntities()) {
+			if(buildingIDs.contains(next)) {
+				Building building = (Building) model.getEntity(next);
+				if(building.isOnFire() && !internSeenFires.contains(next)) {
+					internSeenFires.add(next);
+					//TODO speak add to fireArea
+				}
+			}
+		}
+		
+//		System.out.println("Ambulance team");
+//		try {
+//			String msg = "position "
+//					+ String.valueOf(me().getPosition().getValue());
+//			Logger.debug("Send my position on channel 1 " + msg);
+//			sendSpeak(time, 1, msg.getBytes("UTF-8"));
+//		} catch (java.io.UnsupportedEncodingException uee) {
+//			Logger.error(uee.getMessage());
+//		}
+//		for (Command next : heard) {
+//			byte[] content = ((AKSpeak)next).getContent();
+//			String txt = null;
+//			try {
+//				txt = new String(content, "UTF-8");
+//			} catch (UnsupportedEncodingException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//
+//			String[] parts = txt.split(" ");
+//			if (parts.length != 2) {
+//				Logger.warn("Ignoring " + txt);
+//				continue;
+//			}
+//			int agent = Integer.parseInt(parts[0]);
+//			int building = Integer.parseInt(parts[1]);
+//
+//			if (agent == me().getID().getValue()) {
+//				goal = new EntityID(building);
+//				List<EntityID> path = search.breadthFirstSearch(location()
+//						.getID(), goal);
+//				System.out.println("moving to a building");
+//				sendMove(time, path);
+//				Logger.error("Moving to a building");
+//				
+//				return;
+//			}
+//		}
+		
 		
 		updateUnexploredBuildings(changed);
 		if(me().getBuriedness()>0) {
@@ -71,48 +128,48 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 			return;
 		}
 		
-		// if the agent has already a task where to go
-		if (goal != null) {
-			System.out.println("Ambulance have a goal");
-			List<EntityID> path = search.performSearch(location().getID(),
-					goal);
-			if (path.size() == 1) {
-				Logger.error("Done with reaching");
-				System.out.println("Ambulance reach the goal");
-				boolean foundSomeone = someoneInSameBuilding();
-				Logger.error("Found someone? " + foundSomeone);
-				// We have reached the building
-				String msg = "reached " + goal.getValue() + " " + foundSomeone;
-				try {
-					sendSpeak(time, 1, msg.getBytes("UTF-8"));
-				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				if(foundSomeone == true){
-					System.out.println("Ambulance found someone");
-					for (StandardEntity next : model
-							.getEntitiesOfType(StandardEntityURN.CIVILIAN)) {
-						Human human = (Human) next;
-						if (human.getPosition(model).getID().equals(location().getID())) {
-							targetHuman=human;
-							Logger.debug(next + " is in the same building");
-						}
-					}
-					currentTask = AmbulanceTeamTasks.FOUND_HUMAN;
-				}
-				else
-				{
-					targetHuman=null;
-					currentTask = AmbulanceTeamTasks.NO_TASK;
-				}
-				
-			} else {
-				System.out.println("Ambulance go to the goal");
-				sendMove(time, path);
-				return;
-			}
-		}
+//		// if the agent has already a task where to go
+//		if (goal != null) {
+//			System.out.println("Ambulance have a goal");
+//			List<EntityID> path = search.performSearch(location().getID(),
+//					goal);
+//			if (path.size() == 1) {
+//				Logger.error("Done with reaching");
+//				System.out.println("Ambulance reach the goal");
+//				boolean foundSomeone = someoneInSameBuilding();
+//				Logger.error("Found someone? " + foundSomeone);
+//				// We have reached the building
+//				String msg = "reached " + goal.getValue() + " " + foundSomeone;
+//				try {
+//					sendSpeak(time, 1, msg.getBytes("UTF-8"));
+//				} catch (UnsupportedEncodingException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				if(foundSomeone == true){
+//					System.out.println("Ambulance found someone");
+//					for (StandardEntity next : model
+//							.getEntitiesOfType(StandardEntityURN.CIVILIAN)) {
+//						Human human = (Human) next;
+//						if (human.getPosition(model).getID().equals(location().getID())) {
+//							targetHuman=human;
+//							Logger.debug(next + " is in the same building");
+//						}
+//					}
+//					currentTask = AmbulanceTeamTasks.FOUND_HUMAN;
+//				}
+//				else
+//				{
+//					targetHuman=null;
+//					currentTask = AmbulanceTeamTasks.NO_TASK;
+//				}
+//				
+//			} else {
+//				System.out.println("Ambulance go to the goal");
+//				sendMove(time, path);
+//				return;
+//			}
+//		}
 		
 		
 		if (someoneOnBoard()) {

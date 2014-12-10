@@ -1,5 +1,8 @@
 package ambulance;
 
+import java.util.List;
+
+import rescuecore2.standard.entities.Civilian;
 import rescuecore2.worldmodel.EntityID;
 
 public class AtTargetSelection {
@@ -11,8 +14,17 @@ public class AtTargetSelection {
 	}
 	
 	//Return the cost it take to rescue the human
-	public  int rescueTime(EntityID humanID){
-		
-		return 0;
+	public  Civilian rescueSelection(List<Civilian> BuriedCivilians){
+		int valuefinal=0;
+		Civilian best=null;
+		for(Civilian next : BuriedCivilians)
+		{
+			int value = next.getBuriedness() + next.getDamage() + next.getHP();
+			if(value<valuefinal && value >0) {
+				value = valuefinal;
+				best = next;
+			}
+		}
+		return best;
 	}
 }

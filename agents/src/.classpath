@@ -32,5 +32,6 @@
 	<classpathentry kind="lib" path="/home/alaha775/git/tddd10/jars/sample.jar"/>
 	<classpathentry kind="lib" path="/home/alaha775/git/tddd10/jars/standard.jar"/>
 	<classpathentry kind="lib" path="/home/alaha775/git/tddd10/jars/traffic3.jar"/>
+	<classpathentry kind="lib" path="/home/alaha775/git/tddd10/lib/rcrscs-v1.231.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
