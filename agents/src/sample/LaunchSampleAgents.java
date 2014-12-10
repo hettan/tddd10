@@ -135,10 +135,7 @@ public final class LaunchSampleAgents {
         }
         try {
             Logger.info("Connecting viewer...");
-            //launcher.connect(new SampleViewer());
-            System.out.println("Connecting viewer...");
-            launcher.connect(new GBSViewer());
-            System.out.println("success");
+            launcher.connect(new SampleViewer());
             Logger.info("success");
         }
         catch (ComponentConnectionException e) {
