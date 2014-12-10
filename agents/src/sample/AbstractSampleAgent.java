@@ -92,7 +92,6 @@ public abstract class AbstractSampleAgent<E extends StandardEntity> extends Stan
        @return A random walk.
     */
     protected List<EntityID> randomWalk() {
-		//System.out.println("Random walk"+this.getClass().getName());
         List<EntityID> result = new ArrayList<EntityID>(RANDOM_WALK_LENGTH);
         Set<EntityID> seen = new HashSet<EntityID>();
         EntityID current = ((Human)me()).getPosition();
