@@ -50,7 +50,7 @@ public class AbstractMapLayer extends StandardViewLayer{
 		graphics2d = g;
 
 		Collection<RenderedObject> objects = new HashSet<RenderedObject>(); 
-		
+		/*
 		g.setColor(Color.green);
 		for(BorderNode b : borderNodes){
 			Ellipse2D.Double currentDot = new Ellipse2D.Double(arg1.xToScreen(
@@ -66,7 +66,7 @@ public class AbstractMapLayer extends StandardViewLayer{
 		ArrayList<EntityID> path = (ArrayList<EntityID>) astar.performSearch(eId, 
 				goalID);
 		printPath(path);
-		 
+		 */
 		return objects;
 	}
 
