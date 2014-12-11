@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import org.apache.commons.io.IOUtils;
 
 import firebrigade.prediction.training.Logger.Level;
+import firebrigade.prediction.training.genetics.GenerationGeneticResult;
 
 public class TrainingPersistor {
 
@@ -74,10 +75,10 @@ public class TrainingPersistor {
 	 */
 	public int getStorageIdentifier(int count)
 	{
-		return count;
+		return count + 1;
 	}
 	
-	public boolean storeData(int storageIdentifier, TrainingResult[] results)
+	public boolean storeData(int storageIdentifier, GenerationGeneticResult[] results)
 	{
 		for(int i = 0; i < results.length; i++)
 		{
@@ -102,11 +103,11 @@ public class TrainingPersistor {
 		return false;
 	}
 	
-	public TrainingResult[] fetchData(int storageIdentifier)
+	public GenerationGeneticResult[] fetchData(int storageIdentifier)
 	{
 		File directory = new File(getStoragePath(storageIdentifier));
 		String[] resultFiles = directory.list();
-		TrainingResult[] ret = new TrainingResult[resultFiles.length];
+		GenerationGeneticResult[] ret = new GenerationGeneticResult[resultFiles.length];
 		for(int i = 0; i < resultFiles.length; i++)
 		{
 			File file = new File(getStoragePath(storageIdentifier) + "/" + resultFiles[i]);	         
@@ -120,7 +121,7 @@ public class TrainingPersistor {
 				Logger.Write(Level.ERROR, "Could not read from file: " + e.getMessage());
 				continue;
 			}
-			ret[i] = TrainingResult.fromPersistanceFormat(trainingResultStr);
+			ret[i] = GenerationGeneticResult.fromPersistanceFormat(trainingResultStr);
 		}
 		Logger.Write("Fetched training results from: " + getStoragePath(storageIdentifier));
 		return ret;

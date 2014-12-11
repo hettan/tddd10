@@ -2,6 +2,10 @@ package sample;
 
 import static rescuecore2.misc.Handy.objectsToIDs;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,7 +16,6 @@ import rescuecore2.worldmodel.EntityID;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.messages.Command;
 import rescuecore2.log.Logger;
-
 import rescuecore2.standard.entities.StandardEntity;
 import rescuecore2.standard.entities.StandardEntityURN;
 import rescuecore2.standard.entities.Building;
@@ -44,6 +47,17 @@ public class SampleFireBrigade extends AbstractSampleAgent<FireBrigade> {
         maxDistance = config.getIntValue(MAX_DISTANCE_KEY);
         maxPower = config.getIntValue(MAX_POWER_KEY);
         Logger.info("Sample fire brigade connected: max extinguish distance = " + maxDistance + ", max power = " + maxPower + ", max tank = " + maxWater);
+        File file = new File("test.txt");
+		FileWriter fw;
+		try {
+			fw = new FileWriter(file.getAbsoluteFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write("hi");
+			bw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     @Override

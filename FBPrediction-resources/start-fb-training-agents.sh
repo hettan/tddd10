@@ -14,3 +14,4 @@ echo "Agents started."
 waitFor agents_status.txt "done"
 
 kill $PIDS
+rm agents_status.txt

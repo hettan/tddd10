@@ -1,17 +1,20 @@
 package firebrigade.prediction.training;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
 import firebrigade.prediction.training.Logger.Level;
+import firebrigade.prediction.training.genetics.Chromosome;
+import firebrigade.prediction.training.genetics.GenerationGeneticResult;
+import firebrigade.prediction.training.genetics.GeneticsManager;
 
 public class TrainingConductor {
 
 	private final int AMOUNT_OF_WORKERS_GENERATION = 3;
-	private final int AMOUNT_PARALLELL_RUNS = 1;
-	private final int AMOUNT_RUN_IN_PARALLEL = AMOUNT_OF_WORKERS_GENERATION / AMOUNT_PARALLELL_RUNS;
 	private final int BASE_PORT = 8000;
 	private final String HOST = "localhost";
 	private int getPort(int offset)
@@ -22,6 +25,9 @@ public class TrainingConductor {
 	private TrainingConductorWorker[] _workers;
 	//Used to store the results of all generations.
 	private TrainingPersistor _persistor;
+	
+	//Used to handle the genetic evolution.
+	private GeneticsManager _geneticsManager;
 	
 	
 	/*
@@ -36,6 +42,7 @@ public class TrainingConductor {
 		//Set up the storage.
 		_persistor = new TrainingPersistor();
 		_persistor.initialize();
+		_geneticsManager = new GeneticsManager();
 		
 		//Copies all temporary files.
 		initializeTemporaryFiles();
@@ -109,31 +116,30 @@ public class TrainingConductor {
 		TrainingScenario [] scenarios = getTrainingScenarios();
 		
 		
-		for(int y = 0; y < AMOUNT_PARALLELL_RUNS; y++)
+		for(int i = 0; i < AMOUNT_OF_WORKERS_GENERATION; i++)
 		{
-
-			for(int i = 0; i < AMOUNT_RUN_IN_PARALLEL; i++)
-			{
-				int index = i + y*AMOUNT_RUN_IN_PARALLEL;
-				_workers[index].runSimulationAsync(scenarios[index]);
-			}
+			int index = i;
+			_workers[index].runSimulationAsync(scenarios[index]);
 			
-			for(int i = 0; i < AMOUNT_RUN_IN_PARALLEL; i++)
-			{
-				int index = i + y*AMOUNT_RUN_IN_PARALLEL;
-				if(!_workers[index].isDone()){
-					Logger.Write("Waiting for " + _workers[index].getID() + ".");
-					_workers[index].waitFor();
-					Logger.Write("Done waiting!");
-				}
-			}
-			
-			for(int i = 0; i < AMOUNT_RUN_IN_PARALLEL; i++)
-			{
-				int index = i + y*AMOUNT_RUN_IN_PARALLEL;
-				_workers[index].releaseResources();
+		}
+		
+		for(int i = 0; i < AMOUNT_OF_WORKERS_GENERATION; i++)
+		{
+			int index = i;
+			if(!_workers[index].isDone()){
+				Logger.Write("Waiting for " + _workers[index].getID() + ".");
+				_workers[index].waitFor();
+				_workers[index].saveResults();
+				Logger.Write("Done waiting!");
 			}
 		}
+		
+		for(int i = 0; i < AMOUNT_OF_WORKERS_GENERATION; i++)
+		{
+			int index = i;
+			_workers[index].releaseResources();
+		}
+		
 		try {
 			Thread.sleep(5000);//The waiting time for this to remove the processes.
 		} catch (InterruptedException e) {
@@ -145,7 +151,7 @@ public class TrainingConductor {
 	
 	private void saveGeneration()
 	{
-		TrainingResult[] results = new TrainingResult[AMOUNT_OF_WORKERS_GENERATION];
+		GenerationGeneticResult[] results = new GenerationGeneticResult[AMOUNT_OF_WORKERS_GENERATION];
 		for(int i = 0; i < _workers.length; i++)
 			results[i] = _workers[i].getResult();
 		int id = _persistor.allocateStorage();
@@ -155,20 +161,24 @@ public class TrainingConductor {
 	private TrainingScenario[] getTrainingScenarios()
 	{
 		int newest = _persistor.getNewestStorage();
+		Chromosome[] chromosomes;
 		if(newest == 0)
 		{
 			//Create a default instance
+			chromosomes = _geneticsManager.createInitialGeneration(AMOUNT_OF_WORKERS_GENERATION);
 		}
 		else
 		{
-			TrainingResult[] previousResults = _persistor.fetchData(newest);
+			GenerationGeneticResult[] previousResults = _persistor.fetchData(newest);
 			//Evolve it and create new instances.
+			chromosomes = _geneticsManager.evolve(previousResults);
+			
 		}
 		TrainingScenario[] scenario = new TrainingScenario[AMOUNT_OF_WORKERS_GENERATION];
 		for(int i = 0; i < scenario.length; i++)
 		{
 			//Add the instance
-			scenario[i] = new TrainingScenario("localhost", getPort(i));
+			scenario[i] = new TrainingScenario("localhost", getPort(i), chromosomes[i]);
 		}
 		return scenario;
 	}
@@ -197,5 +207,47 @@ public class TrainingConductor {
 		Logger.Write("TrainingConductor has cleaned up.");;
 	}
 	
-	
+	/*
+	 * Takes the best output from the generations and saves it for future use.
+	 */
+	public void saveBestNetwork() throws IOException
+	{
+		Logger.Write("Saving the best trained network...");
+		int generations = _persistor.getStorageCount();
+		GenerationGeneticResult best = null;
+		double bestFitness = 0;
+		for(int i = 0; i < generations; i++)
+		{
+			int storageIndex = _persistor.getStorageIdentifier(i);
+			GenerationGeneticResult[] results = _persistor.fetchData(storageIndex);
+			for(int x = 0; x < results.length; x++)
+			{
+				if(results[x].getFitness() > bestFitness)
+				{
+					best = results[x];
+					bestFitness = results[x].getFitness();
+				}
+			}
+		}
+		Chromosome toSave;
+		if(best == null)
+		{
+			toSave = new Chromosome();
+			Logger.Write("Did not find a best network. Saving a default one.");
+		}
+		else
+		{
+			toSave = best.getChromosome();
+		}
+		File file = new File(EnvironmentPaths.NEURAL_NETWORK_TRAINED);
+		if(!file.exists())
+			file.createNewFile();
+		
+		String resultStr = toSave.toString();
+		FileWriter fw = new FileWriter(file.getAbsoluteFile());
+		BufferedWriter bw = new BufferedWriter(fw);
+		bw.write(resultStr);
+		bw.close();
+		Logger.Write("Saved.");
+	}
 }

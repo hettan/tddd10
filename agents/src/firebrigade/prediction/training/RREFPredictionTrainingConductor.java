@@ -46,7 +46,7 @@ public class RREFPredictionTrainingConductor {
 			boolean connected = false;
 			do {
 				try{
-					Thread.sleep(10000);
+					Thread.sleep(4000);
 					System.out.println("Starting agents...");	
 					agentsProcess = agentsProcessBuilder.start();
 					System.out.println("Agents started.");

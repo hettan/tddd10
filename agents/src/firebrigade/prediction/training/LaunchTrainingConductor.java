@@ -18,9 +18,19 @@ public class LaunchTrainingConductor {
 		}
 		
 		//Run conductors training.
-		conductor.runGeneration();
+		for(int i = 0; i < 3; i++)
+			conductor.runGeneration();
 		
+		//Removes all temporary files created for the training.
 		conductor.cleanup();
+		
+		//Saves the best network.
+		try {
+			conductor.saveBestNetwork();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

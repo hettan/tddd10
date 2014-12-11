@@ -3,6 +3,7 @@ package firebrigade.prediction.training;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
@@ -12,7 +13,10 @@ import java.lang.reflect.Field;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
+import firebrigade.prediction.NeuralNetworkPrediction;
 import firebrigade.prediction.training.Logger.Level;
+import firebrigade.prediction.training.genetics.Chromosome;
+import firebrigade.prediction.training.genetics.GenerationGeneticResult;
 
 public class TrainingConductorWorker {
 	
@@ -23,6 +27,8 @@ public class TrainingConductorWorker {
 	private Process _simulatorProcess;
 	private Process _agentsProcess;
 	private Thread _simulationStarter;
+	
+	private GenerationGeneticResult _result;
 	
 	public TrainingConductorWorker()
 	{
@@ -145,6 +151,30 @@ public class TrainingConductorWorker {
 		return _isDone;
 	}
 	
+	public void saveResults()
+	{
+		String fitnessResult = "0.0";
+		File fitnessFile = new File(getBootFolderPath() + "/fitnessObserver.txt");
+		try {
+			fitnessResult = IOUtils.toString(new FileInputStream(fitnessFile));
+		} catch (FileNotFoundException e) {
+			Logger.Write(Level.ERROR, "Could not open file: " + e.getMessage());
+		} catch (IOException e) {
+			Logger.Write(Level.ERROR, "Could not read from file: " + e.getMessage());
+		}
+		String chromosomeResult = "0";
+		File chromosomeFile = new File(getBootFolderPath() + "/chromosome.txt");
+		try {
+			chromosomeResult = IOUtils.toString(new FileInputStream(chromosomeFile));
+		} catch (FileNotFoundException e) {
+			Logger.Write(Level.ERROR, "Could not open file: " + e.getMessage());
+		} catch (IOException e) {
+			Logger.Write(Level.ERROR, "Could not read from file: " + e.getMessage());
+		}
+		
+		_result = GenerationGeneticResult.fromPersistanceFormat(fitnessResult + "\n" + chromosomeResult);
+	}
+	
 	/*
 	 * Releases all the resources used for
 	 * the simulation.
@@ -153,6 +183,9 @@ public class TrainingConductorWorker {
 	{
 		File agentsStartPidFile = new File(getBootFolderPath() + "/" + "agents_status.txt"); 
 		try{
+			if(!agentsStartPidFile.exists())
+				agentsStartPidFile.createNewFile();
+			
 			//This is hardcoded in the agents startup script, it's waiting  for the done to be written to the file.
 			//The reason is because the script alone has all the PIDs, which it can then kill by itself, much easier than
 			//trying ugly hacks from eclipse.
@@ -167,15 +200,17 @@ public class TrainingConductorWorker {
 			Logger.Write(Level.ERROR, "Could not remove the agents script process: " + e.getMessage());
 		}
 		
+		_isActive = false;
 		Logger.Write("Relased resouces: " + this.getID());
 	}
+	
 	
 	/*
 	 * Gets the result from the previous simulation run.
 	 */
-	public TrainingResult getResult()
+	public GenerationGeneticResult getResult()
 	{
-		return new TrainingResult(0);
+		return _result;
 	}
 	
 	/*
@@ -248,6 +283,22 @@ public class TrainingConductorWorker {
 			{
 				Logger.Write(Level.ERROR, "Could not locate commons.cfg: " + path);
 				throw new IOException("Could not locate file: " + path);
+			}
+			
+			File chromosomeFile = new File(getBootFolderPath() + "/chromosome.txt");
+			if(!chromosomeFile.exists())
+				chromosomeFile.createNewFile();
+			try
+			{
+				BufferedWriter writer = new BufferedWriter(new FileWriter(chromosomeFile));
+				writer.write(scenario.getChromosome().toString());
+				writer.close();
+				Logger.Write("Added chromosome details to scenario.");
+			} 
+			catch(Exception e)
+			{
+				Logger.Write(Level.ERROR, "Could not store chromosome file. Aborting.");
+				throw e;				
 			}
 		}
 	}

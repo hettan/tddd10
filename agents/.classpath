@@ -32,5 +32,9 @@
 	<classpathentry kind="lib" path="/home/jocke/git/tddd10/RescueSimulator/jars/sample.jar"/>
 	<classpathentry kind="lib" path="/home/jocke/git/tddd10/RescueSimulator/jars/standard.jar"/>
 	<classpathentry kind="lib" path="/home/jocke/git/tddd10/RescueSimulator/jars/traffic3.jar"/>
+	<classpathentry kind="lib" path="/home/jocke/git/tddd10/FBPrediction-resources/commons-io-2.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="/home/jocke/git/tddd10/FBPrediction-resources/neuroph-core-2.9.jar"/>
+	<classpathentry exported="true" kind="lib" path="/home/jocke/git/tddd10/FBPrediction-resources/slf4j-api-1.7.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="/home/jocke/git/tddd10/FBPrediction-resources/slf4j-nop-1.7.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

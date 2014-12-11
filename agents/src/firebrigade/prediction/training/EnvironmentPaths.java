@@ -8,5 +8,7 @@ public class EnvironmentPaths {
 	public static final String RESUCE_TRAINING_MAP_PATH = RESCUE_SIMULATOR_PATH + "/maps/training-map"; 
 	public static final String SIMULATOR_START_SCRIPT = "start-fb-training-simulator.sh";
 	public static final String AGENT_START_SCRIPT = "start-fb-training-agents.sh";
+	public static final String NEURAL_NETWORK_SCENARIO = "chromosome.txt";
+	public static final String NEURAL_NETWORK_TRAINED = FBPREDICTION_RESOURCES_PATH + "/neural_network.nn";
 
 }
