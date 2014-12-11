@@ -7,6 +7,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Random;
+
+import navigation_emil.GridBasedSearch;
+import navigation_emil.SimpleTimer;
+import navigation_linus.HPAstar;
 
 import exploration.ExplorationAgent;
 
@@ -46,6 +51,94 @@ public class SampleFireBrigade extends ExplorationAgent<FireBrigade> {//Abstract
         maxDistance = config.getIntValue(MAX_DISTANCE_KEY);
         maxPower = config.getIntValue(MAX_POWER_KEY);
         Logger.info("Sample fire brigade connected: max extinguish distance = " + maxDistance + ", max power = " + maxPower + ", max tank = " + maxWater);
+    
+        
+    	Collection<StandardEntity> entities = model.getAllEntities();
+		StandardEntity[] eArray = new StandardEntity[entities.size()];
+		eArray = entities.toArray(eArray);
+		int totLen = 0;
+		int notFound = 0;
+		SearchAlgorithm search2 = new HPAstar(model);
+		Random rnd = new Random();
+		SimpleTimer.reset("Tid: ");
+		for(int i = 0; i < 300; i++) {
+
+			EntityID eid1 = eArray[rnd.nextInt(entities.size())].getID();
+			EntityID eid2 = eArray[rnd.nextInt(entities.size())].getID();
+			List<EntityID> resultArray =  search2.performSearch(eid1,eid2);
+			if(resultArray != null){
+				int temp = 0;
+				EntityID prev = null;
+				for(EntityID e : resultArray){
+					temp += model.getDistance(e, prev);
+					prev = e;
+				}
+				totLen += temp;
+			} else {
+				notFound++;
+				//System.out.println("First: " + p.first() + " second: " + p.second());
+			}
+		}
+
+		SimpleTimer.printTime();
+		System.out.println("HPAstar längd brigade: " + totLen + " notFound : " + notFound);
+		
+		totLen = 0;
+		notFound = 0;
+		search2 = new GridBasedSearch(model);
+		SimpleTimer.reset("Tid: ");
+		for(int i = 0; i < 10; i++) {
+			System.out.println("hej2");
+			EntityID eid1 = eArray[rnd.nextInt(entities.size())].getID();
+			EntityID eid2 = eArray[rnd.nextInt(entities.size())].getID();
+			System.out.println(eid1 + " hej4 " + eid2);
+			List<EntityID> resultArray =  search2.performSearch(eid1,eid2);
+			System.out.println("hej5");
+			if(resultArray != null){
+				int temp = 0;
+				EntityID prev = null;
+				for(EntityID e : resultArray){
+					temp += model.getDistance(e, prev);
+					prev = e;
+				}
+				totLen += temp;
+			} else {
+				notFound++;
+				//System.out.println("First: " + p.first() + " second: " + p.second());
+			}
+			System.out.println("hej3");
+		}
+
+		SimpleTimer.printTime();
+		System.out.println("GridBasedSearch längd brigade: " + totLen + " notFound : " + notFound);
+		
+		totLen = 0;
+		notFound = 0;
+		search2 = new SampleSearch(model);
+		SimpleTimer.reset("Tid: ");
+		for(int i = 0; i < 300; i++) {
+
+			EntityID eid1 = eArray[rnd.nextInt(entities.size())].getID();
+			EntityID eid2 = eArray[rnd.nextInt(entities.size())].getID();
+			List<EntityID> resultArray =  search2.performSearch(eid1,eid2);
+		//	System.out.println(eid2 + " hej" + eid1);
+			if(resultArray != null){
+				int temp = 0;
+				EntityID prev = null;
+				for(EntityID e : resultArray){
+					temp += model.getDistance(e, prev);
+					prev = e;
+				}
+				totLen += temp;
+			} else {
+				notFound++;
+				//System.out.println("First: " + p.first() + " second: " + p.second());
+			}
+		}
+
+		SimpleTimer.printTime();
+		System.out.println("sampleSearch längd brigade: " + totLen + " notFound : " + notFound);
+		
     }
 
     @Override
