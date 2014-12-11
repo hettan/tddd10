@@ -61,7 +61,7 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 		mapLayer = mapLayerIn;
 	}
 
-	@SuppressWarnings("unchecked")
+	//@SuppressWarnings("unchecked")
 	private ArrayList<Area> Search(Area start, ArrayList<Area> goalAreas) {
 
 		//	System.out.println("search for a path with hpa*, nr of goals " + goalAreas.size() + 
@@ -73,17 +73,19 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 		initPath.heuristic = manhattanDistance(start, goalAreas);
 		priorityQueue.add(initPath);
 		checked.add(new CheckedArea(0,start.getID()));
-		ArrayList<BorderNode> borderNodes = mapLayer.getBorderNodes();
+		ArrayList<BorderNode> borderNodes = (ArrayList<BorderNode>) mapLayer.getBorderNodes().clone();
 
 		//Add startNode to abstractMap
 		BorderNode startNode = null;
 		if(!mapLayer.isBorderNode(start)){
+			System.out.println("start is not bordernode");
 			int cluster = mapLayer.getCluster(start);
 			startNode = new BorderNode(cluster, start);
 
 			mapLayer.CreateIntraEdgeConcerningBlockades(startNode);
 
-			mapLayer.addBorderNode(startNode);
+			//mapLayer.addBorderNode(startNode);
+			borderNodes.add(startNode);
 		}
 
 		//Add goalNodes to abstractMap
@@ -91,10 +93,14 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 		ArrayList<ArrayList<Path>> tempPaths = new ArrayList<ArrayList<Path>>();
 		for(Area a : goalAreas){
 			if(!mapLayer.isBorderNode(a)){
+				System.out.println("start is not bordernode");
 				int cluster = mapLayer.getCluster(a);
 				BorderNode goalNode = new BorderNode(cluster, a);
-				mapLayer.addBorderNode(goalNode);
+			//	mapLayer.addBorderNode(goalNode);
 				mapLayer.CreateIntraEdge(goalNode);
+				borderNodes.add(goalNode);
+				
+
 				goals.add(goalNode);
 
 				for(BorderNode b : borderNodes){
@@ -104,6 +110,8 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 				}
 			}
 		}
+
+		//borderNodes = mapLayer.getBorderNodes();
 
 		while(!priorityQueue.isEmpty()){
 
@@ -158,13 +166,27 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 						newPath.path.addAll(p.path);
 						newPath.length = length;
 						newPath.heuristic = manhattanDistance(p.dest,goalAreas);
+						
+						//Remove longer paths with the same dest
+						ArrayList<Path> tempArray = new ArrayList<Path>();
+						for(Path path : priorityQueue){
+							if(path.dest == p.dest){
+								tempArray.add(path);
+							}
+						}
+						for(Path path : tempArray){
+							priorityQueue.remove(path);
+						}
+						
+						//Add new path
 						priorityQueue.add(newPath);
+						
 					}
 				}
 			}
 		}
-
-		removeTempBorders(startNode, goals, tempPaths, borderNodes);
+		
+		//removeTempBorders(startNode, goals, tempPaths, borderNodes);
 		//System.out.println("path is not found!");
 
 		return null;

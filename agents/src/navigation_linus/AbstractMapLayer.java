@@ -14,7 +14,6 @@ import java.util.Queue;
 import rescuecore2.misc.gui.ScreenTransform;
 import rescuecore2.standard.entities.Area;
 import rescuecore2.standard.entities.Blockade;
-import rescuecore2.standard.entities.Road;
 import rescuecore2.standard.entities.StandardWorldModel;
 import rescuecore2.standard.view.StandardViewLayer; 
 import rescuecore2.view.RenderedObject;
@@ -50,23 +49,39 @@ public class AbstractMapLayer extends StandardViewLayer{
 		graphics2d = g;
 
 		Collection<RenderedObject> objects = new HashSet<RenderedObject>(); 
-		/*
+	//	EntityID e1  = new EntityID(33329);
+		
+		EntityID e1  = new EntityID(32737);
+		//EntityID e2  = new EntityID(15338);
+		EntityID e2  = new EntityID(3714);
+		
+		g.setColor(Color.blue);
+		Ellipse2D.Double currentDot = new Ellipse2D.Double(arg1.xToScreen(
+				((Area)model.getEntity(e1)).getX()), arg1.yToScreen(((Area)model.getEntity(e1)).getY()), 10, 10);
+		g.fill(currentDot);
+		g.setColor(Color.red);
+		Ellipse2D.Double currentDot2 = new Ellipse2D.Double(arg1.xToScreen(
+				((Area)model.getEntity(e2)).getX()), arg1.yToScreen(((Area)model.getEntity(e2)).getY()), 10, 10);
+		g.fill(currentDot2);
+		
 		g.setColor(Color.green);
 		for(BorderNode b : borderNodes){
-			Ellipse2D.Double currentDot = new Ellipse2D.Double(arg1.xToScreen(
+			Ellipse2D.Double currentDot21 = new Ellipse2D.Double(arg1.xToScreen(
 					b.road.getX()), arg1.yToScreen(b.road.getY()), 10, 10);
-			g.fill(currentDot);
-			objects.add(new RenderedObject(null, currentDot)); 
+			g.fill(currentDot21);
+			objects.add(new RenderedObject(null, currentDot21)); 
 		}
+	
 
-		EntityID eId = new EntityID(31109);
-		EntityID goalID = new EntityID(35294);
 
+		
+System.out.println("before search");
 		HPAstar astar = new HPAstar(model, borderNodes, this);
-		ArrayList<EntityID> path = (ArrayList<EntityID>) astar.performSearch(eId, 
-				goalID);
+		ArrayList<EntityID> path = (ArrayList<EntityID>) astar.performSearch(e1, 
+				e2);
+		System.out.println("After search");
 		printPath(path);
-		 */
+		 
 		return objects;
 	}
 
@@ -121,7 +136,7 @@ public class AbstractMapLayer extends StandardViewLayer{
 					}
 				}
 
-				p.length = p.length + largestBlockade*10000;
+				p.length = p.length + (largestBlockade-1)*10000;
 			}
 
 			borderNode.neighbors.addAll(pArray);
@@ -280,7 +295,8 @@ public class AbstractMapLayer extends StandardViewLayer{
 	}
 
 	public void printPath(ArrayList<EntityID> path){
-		if(!path.isEmpty()){
+
+		if(path != null && !path.isEmpty()){
 			graphics2d.setColor(Color.blue);
 			Area startRoad = (Area) model.getEntity(path.get(0));
 			Area goalRoad = (Area) model.getEntity(path.get(path.size()-1));
@@ -351,11 +367,11 @@ public class AbstractMapLayer extends StandardViewLayer{
 		int width = right-left;
 		int height = top - bottom;
 
-		for(int x = left; x < right; x += width/4){
+		for(int x = left; x < right; x += width/6){
 			Line2D.Double line = new Line2D.Double(x, top, x, bottom);
 			lineList.add(line);
 		}
-		for(int y = bottom; y < top; y += height/4){
+		for(int y = bottom; y < top; y += height/6){
 			Line2D.Double line = new Line2D.Double(right, y, left, y);
 			lineList.add(line);
 		}
@@ -364,7 +380,7 @@ public class AbstractMapLayer extends StandardViewLayer{
 		for (Entity entity : model.getAllEntities()) {
 			if(entity instanceof Area){
 				for(EntityID neighborId : ((Area) entity).getNeighbours()){
-					if(model.getEntity(neighborId) instanceof Road){
+					if(model.getEntity(neighborId) instanceof Area){
 						Area neighborRoad = (Area) model.getEntity(neighborId);
 						Area currentRoad = (Area) entity;
 
@@ -404,8 +420,8 @@ public class AbstractMapLayer extends StandardViewLayer{
 		}
 
 		//Create meshArray Rectangles
-		for(int x = left; x < right; x += width/4 +1 ){
-			for(int y = bottom; y < top; y += height/4 +1){
+		for(int x = left; x < right; x += width/6 +1 ){
+			for(int y = bottom; y < top; y += height/6 +1){
 				Rectangle2D.Double rectangle = new Rectangle2D.Double(x, 
 						y, 
 						width/4, 
