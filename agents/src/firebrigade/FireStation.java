@@ -74,24 +74,28 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre>
 				String[] parts = txt.split(" ");
 				switch (parts[0]) 
 				{
-					case "informations":
+					case "informations ":
 					{
-						int agentID = Integer.parseInt(parts[1]);
-						int waterLevel = Integer.parseInt(parts[2]);
-						int busyInt = Integer.parseInt(parts[3]);
+						int posX = Integer.parseInt(parts[1]);
+						int posY = Integer.parseInt(parts[2]);
+						int agentID = Integer.parseInt(parts[3]);
+						int waterLevel = Integer.parseInt(parts[4]);
+						int busyInt = Integer.parseInt(parts[5]);
 						for(int k = 0; k < agents.size(); k++)
 						{
 							FireBrigadeAgent agent = agents.get(k);
 							if(agent.getID().getValue() == agentID)
 							{
+								agent.setPosX(posX);
+								agent.setPosY(posY);
 								agent.setWaterAmount(waterLevel);
 								if(busyInt == 0)
 								{
-									busy = false;
+									agent.setBusy(false);
 								}
 								else
 								{
-									busy = true;
+									agent.setBusy(true);
 								}
 							}
 						}
@@ -129,7 +133,7 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre>
 					EntityID agent2 = agent.getID();
 					double agentCost = 0;
 					FireBrigade agentEntity = (FireBrigade) model.getEntity(agent2);
-					agentCost = calculateUtility(agentEntity,fireBrigadesNeeded,area);
+					agentCost = calculateUtility(agent,fireBrigadesNeeded,area);
 					costForAgent.put(agentEntity, agentCost);
 				}
 				costFireArea.put(area, costForAgent);
@@ -170,7 +174,7 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre>
 		}
 	}
 	
-	private double calculateUtility(FireBrigade agentEntity,int fireBrigadesNeeded,FireArea area) 
+	private double calculateUtility(FireBrigadeAgent agent,int fireBrigadesNeeded,FireArea area) 
 	{
 		double tempCost = 0;
 		double cost = 0;
@@ -187,17 +191,17 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre>
 			int buildingID = buildings.get(j);
 			EntityID buildingEntity = new EntityID(buildingID);
 			Building buildingEntityB = (Building) model.getEntity(buildingEntity);
-			int x = buildingEntityB.getX() - agentEntity.getX();
-			int y = buildingEntityB.getY() - agentEntity.getY();
+			int x = buildingEntityB.getX() - agent.getPosX();
+			int y = buildingEntityB.getY() - agent.getPosY();
 			tempDistance = Math.hypot(x, y) / Math.hypot(bounds.getWidth(), bounds.getHeight());
 			distance =+ tempDistance;
 			
 			fierynessTemp = buildingEntityB.getFieryness();
 			fieryness =+ fierynessTemp;	
 		}
-		double waterLevel = agentEntity.getWater();
+		double waterLevel = agent.getWaterAmount();
 
-		if(fireBrigadeForArea.containsValue(agentEntity));
+		if(fireBrigadeForArea.containsValue(agent.getID()));
 		{
 			busy =+100;
 		}

@@ -7,6 +7,8 @@ import rescuecore2.worldmodel.EntityID;
 public class FireBrigadeAgent {
 	
 	EntityID ID;
+	int posX;
+	int posY;
 	double waterAmount;
 	boolean busy;
 	
@@ -16,7 +18,25 @@ public class FireBrigadeAgent {
 		this.waterAmount = waterAmount;
 		this.busy = busy;
 	}
+	
+	public int getPosX() {
+		return posX;
+	}
 
+
+	public void setPosX(int posX) {
+		this.posX = posX;
+	}
+
+
+	public int getPosY() {
+		return posY;
+	}
+
+
+	public void setPosY(int posY) {
+		this.posY = posY;
+	}
 	
 	public EntityID getID() {
 		return ID;
@@ -37,7 +57,6 @@ public class FireBrigadeAgent {
 		this.busy = busy;
 	}
 
-	
 	public String toString() {
 	        return "Professor id: " + getID() + " waterAmount: " + getWaterAmount() + " isBusy: " + isBusy();
 	}

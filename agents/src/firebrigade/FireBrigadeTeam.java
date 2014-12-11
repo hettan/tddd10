@@ -1,7 +1,5 @@
 package firebrigade;
 
-import static rescuecore2.misc.Handy.objectsToIDs;
-
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +32,8 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 	
 	private int maxDistance;
     private int maxWater;
-	
+	private int counter = 0;
+    
     @Override
 	protected void postConnect() {
 		super.postConnect();
@@ -58,16 +57,31 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 			sendSubscribe(time, 3);
 		}
 		
-		//Communication position
-		try {
-			String msg = "position "
-					+ String.valueOf(me().getPosition().getValue());
-			Logger.debug("Send my position on channel 3 " + msg);
-			sendSpeak(time, 3, msg.getBytes("UTF-8"));
-		} catch (java.io.UnsupportedEncodingException uee) 
+		
+		//Communication position every fifth iteration
+		int randomNum = 3 + (int)(Math.random()*5);
+		if(counter >= randomNum)
 		{
-			Logger.error(uee.getMessage());
+			try {
+				boolean busy;
+				if(targetBuilding != null)
+				{
+					busy = true;
+				}
+				else
+				{
+					busy = false;
+				}
+				String msg = "information " + String.valueOf(me().getX()) + " " + String.valueOf(me().getY()) 
+						+ String.valueOf(me().getID() + " " + String.valueOf(me().getWater()) + " " + String.valueOf(busy));
+				Logger.debug("Send my position on channel 3 " + msg);
+				sendSpeak(time, 3, msg.getBytes("UTF-8"));
+			} catch (java.io.UnsupportedEncodingException uee) 
+			{
+				Logger.error(uee.getMessage());
+			}
 		}
+		counter++;
 		
 		//Seen burning buildings
 		for (EntityID next : changed.getChangedEntities()) 
@@ -130,7 +144,7 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 
 			// Go Refill Water
 			if (me.getWater() == 0) {
-				// TODO new path
+				// TODO new Search
 				List<EntityID> path = search.breadthFirstSearch(me()
 						.getPosition(), refugeIDs);
 				if (path != null) {
@@ -143,18 +157,20 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 			
 			int fieryness = 999999999;
 			//Search for building to extinguish
-			if (internToHandleFires.size() != 0) {
-				for (int i = 0; i < internToHandleFires.size(); i++) {
+			if (internToHandleFires.size() != 0) 
+			{
+				for (int i = 0; i < internToHandleFires.size(); i++) 
+				{
 					int burningBuildingID = internToHandleFires.get(i);
-					EntityID burningBuildingEID = new EntityID(
-							burningBuildingID);
-					Building burningBuilding = (Building) model
-							.getEntity(burningBuildingEID);
+					EntityID burningBuildingEID = new EntityID(burningBuildingID);
+					Building burningBuilding = (Building) model.getEntity(burningBuildingEID);
 					int fierynessTemp = burningBuilding.getFieryness();
-					if (fierynessTemp == 0) {
+					if (fierynessTemp == 0) 
+					{
 						internToHandleFires.remove(i);
 						fierynessTemp = 999999999;
 						//SEND EXTINGUISHED FIRE
+						
 						try {
 							String msg = "extinguishedfire " + String.valueOf(burningBuildingID);
 							Logger.debug("Send my position on channel 3 " + msg);
@@ -163,10 +179,10 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 						{
 							Logger.error(uee.getMessage());
 						}
-						
-						
 					}
-					if (fierynessTemp <= fieryness) {
+					
+					if (fierynessTemp <= fieryness) 
+					{
 						fieryness = fierynessTemp;
 						targetBuilding = burningBuildingEID;
 					}
@@ -182,6 +198,7 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 					}
 					else
 					{
+						//TODO new Search
 						List<EntityID> path = planPathToFire(targetBuilding);
 						if (path != null)
 						{
