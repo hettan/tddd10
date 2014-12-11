@@ -2,6 +2,7 @@ package sample;
 
 import java.io.IOException;
 
+import exploration.CustomLayer;
 import navigation_emil.GBSViewer;
 
 import rescuecore2.components.ComponentLauncher;
@@ -83,6 +84,7 @@ public final class LaunchSampleAgents {
 
     private static void connect(ComponentLauncher launcher, int fb, int pf, int at, Config config) throws InterruptedException, ConnectionException {
         int i = 0;
+        int connectedAgents = 0;
         try {
             while (fb-- != 0) {
                 Logger.info("Connecting fire brigade " + (i++) + "...");
@@ -139,7 +141,7 @@ public final class LaunchSampleAgents {
             Logger.info("success");
         }
         catch (ComponentConnectionException e) {
-            Logger.info("failed: " + e.getMessage());
+        	Logger.info("failed: " + e.getMessage());
         }
     }
 }
