@@ -2,6 +2,7 @@ package navigation_emil;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -9,9 +10,11 @@ import java.util.Set;
 import navigation_emil.AStarAlgorithm.PathLenTuple;
 import navigation_emil.GridRelaxation.SearchArea;
 
+import rescuecore2.misc.collections.LazyMap;
 import rescuecore2.standard.entities.Area;
 import rescuecore2.standard.entities.StandardEntity;
 import rescuecore2.standard.entities.StandardWorldModel;
+import rescuecore2.worldmodel.Entity;
 import rescuecore2.worldmodel.EntityID;
 import sample.SearchAlgorithm;
 
@@ -25,21 +28,36 @@ import sample.SearchAlgorithm;
 public class AvoidBlockadeSearch implements SearchAlgorithm {
 
 	StandardWorldModel model;
+	Map<EntityID, Set<EntityID>> graph;
 	
 	public AvoidBlockadeSearch(StandardWorldModel world) {
 		model = world;
+		
+		//Create the graph in the same way as sampleSearch
+		Map<EntityID, Set<EntityID>> neighbours = new LazyMap<EntityID, Set<EntityID>>() {
+			@Override
+			public Set<EntityID> createValue() {
+				return new HashSet<EntityID>();
+			}
+		};
+		for (Entity next : model) {
+			if (next instanceof Area) {
+				Collection<EntityID> areaNeighbours = ((Area)next).getNeighbours();
+				neighbours.get(next.getID()).addAll(areaNeighbours);
+			}
+		}
+		setGraph(neighbours);
 	}
 	
 	@Override
 	public void setGraph(Map<EntityID, Set<EntityID>> newGraph) {
-		// TODO Auto-generated method stub
-		
+		graph = newGraph;
+
 	}
 
 	@Override
 	public Map<EntityID, Set<EntityID>> getGraph() {
-		// TODO Auto-generated method stub
-		return null;
+		return graph;
 	}
 
 	@Override
@@ -55,14 +73,17 @@ public class AvoidBlockadeSearch implements SearchAlgorithm {
 		for(Area area : path.getPath()) {
 			result.add(area.getID());
 		}
+		if(result.isEmpty() || result.size() == 1) return null;
+	//	System.out.println("Made avoidBlockadeSearch, length: " + result.size());
 		return result;
 	}
 
 	@Override
 	public List<EntityID> performSearch(EntityID start,
 			Collection<EntityID> goals) {
-		// TODO Auto-generated method stub
-		return null;
+		EntityID[] arrGoals = new EntityID[goals.size()];
+		
+		return performSearch(start, goals.toArray(arrGoals));
 	}
 
 	@Override

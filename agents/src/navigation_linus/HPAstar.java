@@ -64,13 +64,13 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 	@SuppressWarnings("unchecked")
 	private ArrayList<Area> Search(Area start, ArrayList<Area> goalAreas) {
 
-	//	System.out.println("search for a path with hpa*, nr of goals " + goalAreas.size() + 
-	//			"starts at " + start.getID());
+		//	System.out.println("search for a path with hpa*, nr of goals " + goalAreas.size() + 
+		//			"starts at " + start.getID());
 
 		Queue<Path> priorityQueue = new PriorityQueue<>(20, pathComparator);
 		ArrayList<CheckedArea> checked = new ArrayList<CheckedArea>();
 		Path initPath = new Path(start, start);
-		initPath.heuristic = 0;//manhattanDistance(start, goalAreas);
+		initPath.heuristic = manhattanDistance(start, goalAreas);
 		priorityQueue.add(initPath);
 		checked.add(new CheckedArea(0,start.getID()));
 		ArrayList<BorderNode> borderNodes = mapLayer.getBorderNodes();
@@ -114,7 +114,7 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 				if(cheapestPath.dest == goal){
 
 					removeTempBorders(startNode, goals, tempPaths, borderNodes);
-				//	System.out.println("path is found!");
+					//	System.out.println("path is found!");
 					return cheapestPath.path;
 				}
 			}
@@ -233,11 +233,16 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 	@Override
 	public List<EntityID> performSearch(EntityID start, EntityID... goals) {
 
+		if(!(model.getEntity(start) instanceof Area) || goals.length == 0){
+			return null;
+		}
 		Area startArea = (Area)model.getEntity(start);
 
 		ArrayList<Area> goalAreas = new ArrayList<Area>();
 		for(int i = 0; i < goals.length; i++){
-			goalAreas.add((Area) model.getEntity(goals[i]));
+			if(model.getEntity(goals[i]) instanceof Area){
+				goalAreas.add((Area) model.getEntity(goals[i]));
+			}
 		}
 
 		ArrayList<Area> temp = Search(startArea, goalAreas);
@@ -247,37 +252,22 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 				returnArray.add(temp.get(i).getID());
 			}
 		}
-		
+
 		if(returnArray.isEmpty()){
 			return null;
 		}
-		
+
+		//	System.out.println("Made HPAsearch, length: " + returnArray.size());
 		return returnArray;
 	}
 
 	@Override
 	public List<EntityID> performSearch(EntityID start,
 			Collection<EntityID> goals) {
-		//System.out.println("init nr of goals: " + goals.size());
-		Area startArea = (Area)model.getEntity(start);
 
-		ArrayList<Area> goalAreas = new ArrayList<Area>();
-		for(EntityID e : goals){
-			goalAreas.add((Area) model.getEntity(e));
-		}
-		ArrayList<Area> temp = Search(startArea, goalAreas);
-		ArrayList<EntityID> returnArray = new ArrayList<EntityID>();
-		if(temp != null && !temp.isEmpty()){
-			for(int i = 0; i < temp.size(); i++){
-				returnArray.add(temp.get(i).getID());
-			}
-		}
-		
-		if(returnArray.isEmpty()){
-			return null;
-		}
-		
-		return returnArray;
+		EntityID[] arrGoals = new EntityID[goals.size()];
+
+		return performSearch(start, goals.toArray(arrGoals));
 	}
 
 	@Override
