@@ -140,6 +140,7 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre>
 				double utilityAreaTemp = 0;
 				double utilityArea = 999999999;
 				EntityID areaAgent = null;
+				List<EntityID> areaAgents = new ArrayList<EntityID>();
 				
 				for(int k = 0; k < agents.size(); k++)
 				{
@@ -147,26 +148,36 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre>
 					Iterator<FireBrigade> iterator = costForAgent.keySet().iterator();
 					while(iterator.hasNext())
 					{
-						//TODO ADD FOR MORE AGENTS
-						utilityAreaTemp = costForAgent.get(agentID);
-						if (utilityAreaTemp <= utilityArea)
+						for(int l = 0; l < fireBrigadesNeeded; l++)
 						{
-							utilityArea = utilityAreaTemp;
-							areaAgent = agentID;
+							utilityAreaTemp = costForAgent.get(agentID);
+							if (utilityAreaTemp <= utilityArea)
+							{
+								utilityArea = utilityAreaTemp;
+								areaAgent = agentID;
+								if(!areaAgents.contains(areaAgent))
+								{
+									areaAgents.add(areaAgent);
+								}
+							}
 						}
 					}
-					if(areaAgent != null)
+					
+					if(areaAgents != null)
 					{
-						fireBrigadeForArea.put(area,areaAgent);
-						handledFires.add(area);
-						//Send GO Extinguish
-						try {
-							String msg = "extinguishedfire " + String.valueOf(areaAgent.getValue()) + " " + String.valueOf(fireAreas.get(i));
-							Logger.debug("Send my position on channel 3 " + msg);
-							sendSpeak(time, 3, msg.getBytes("UTF-8"));
-						} catch (java.io.UnsupportedEncodingException uee) 
+						for(int j = 0; j < areaAgents.size(); j++)
 						{
-							Logger.error(uee.getMessage());
+							fireBrigadeForArea.put(area,areaAgent);
+							handledFires.add(area);
+							//Send GO Extinguish
+							try {
+								String msg = "extinguishedfire " + String.valueOf(areaAgent.getValue()) + " " + String.valueOf(fireAreas.get(i));
+								Logger.debug("Send extinguish Fires " + msg);
+								sendSpeak(time, 3, msg.getBytes("UTF-8"));
+							} catch (java.io.UnsupportedEncodingException uee) 
+							{
+								Logger.error(uee.getMessage());
+							}
 						}
 					}
 				}
