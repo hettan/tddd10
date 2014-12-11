@@ -4,28 +4,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.Queue;
 
-import communication.CommunicationDevice;
-import communication.CommunicationFactory;
-import communication.CommunicationGroup;
-import communication.CommunicationType;
-import communication.Message;
-
 import rescuecore2.messages.Command;
-import rescuecore2.misc.Pair;
-import rescuecore2.standard.entities.Building;
 import rescuecore2.standard.entities.Human;
 import rescuecore2.standard.entities.StandardEntity;
 import rescuecore2.standard.entities.StandardEntityURN;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.worldmodel.EntityID;
 import sample.AbstractSampleAgent;
-import rescuecore2.standard.entities.Area;
+
+import communication.CommunicationDevice;
+import communication.CommunicationFactory;
+import communication.CommunicationGroup;
+import communication.CommunicationType;
+import communication.Message;
 
 
 public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAgent<E> {
@@ -37,10 +32,15 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 	private HashMap<EntityID, Float> costs;
 	private CommunicationDevice communication;
 	private float reduceUtilDist = 20000;
-	private List<EntityID> currDst;
+	//private List<EntityID> currDst;
+	private EntityID currDst;
+	private List<EntityID> checked;
 	
 	private static boolean first = true;
-	private List<List<EntityID>> clusters;
+	private static boolean gotCommunication = true;
+	//private List<List<EntityID>> clusters;
+	private KMeansPartitioning partitioning;
+	private HungarianAssignment assignment;
 	
 	public ExplorationAgent() {
 		assignedEntities = new ArrayList<EntityID>();
@@ -49,21 +49,50 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 		communication = CommunicationFactory.createCommunicationDevice();
 		communication.register(CommunicationGroup.ALL);
 		
-		currDst = new ArrayList<EntityID>();
+		//currDst = new ArrayList<EntityID>();
+		currDst = null;
+		checked = new ArrayList<EntityID>(2);
 	}
 
 	@Override
     protected void postConnect() {
         super.postConnect();
-		if (first) {
+		if (gotCommunication && first) {
         	first = false;
-    		Partitioning part = new Partitioning(model);
-    		clusters = part.getClustersKMeans();
-    		
-    		List<EntityID> agentsAssignment = part.getAgentAssigment();
+        	partitioning = new KMeansPartitioning(model);
+        	List<Tuple<Integer,Integer>> clusters = partitioning.getClustersKMeans();
+        	
+        	assignment = new HungarianAssignment(model);
+    		List<EntityID> agentsAssignment = assignment.getAgentAssigment(clusters);
     		sendAssignments(agentsAssignment, 0);
     		System.out.println("Exploration init done!");
+    		
+    		//Garbage collection
+    		partitioning = null;
+    		assignment = null;
         }
+		else if(!gotCommunication) {
+			partitioning = new KMeansPartitioning(model);
+			partitioning.communication = false;
+        	List<Tuple<Integer,Integer>> clusters = partitioning.getClustersKMeans();
+        	System.out.println("Done with partitioning");
+        	assignment = new HungarianAssignment(model);
+    		List<EntityID> agentsAssignment = assignment.getAgentAssigment(clusters);
+    		System.out.println("Done with assignment");
+    		
+    		int myIndex = agentsAssignment.indexOf(getID());
+    		assignedEntities = partitioning.clusters.get(myIndex);
+    		unexploredEntities = assignedEntities;
+    		
+    		updateCosts();
+    		for(EntityID entity : assignedEntities) {
+    			utility.put(entity, 1.0f);
+    		}
+    		
+    		//Garbage collection
+    		partitioning = null;
+    		assignment = null;
+		}
 	}
 	
 	@Override
@@ -80,10 +109,12 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 			
 			//Re-add to the circuit			
 			if(unexploredEntities.size() > 0) {
-				EntityID done = currDst.get(0);
+				//EntityID done = currDst.get(0);
+				EntityID done = currDst;
 				explorationCircuit.add(done);
 				unexploredEntities.remove(done);	
-				currDst.clear();
+				//currDst.clear();
+				currDst = null;
 			}
 		}
 	}
@@ -91,7 +122,7 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 	
 	private void sendAssignments(List<EntityID> agentsAssignment, int time) {
 		for(int i=0; i<agentsAssignment.size(); i++){
-			Message msg = createAssignmentMessage(agentsAssignment.get(i), clusters.get(i), time);
+			Message msg = createAssignmentMessage(agentsAssignment.get(i), partitioning.clusters.get(i), time);
 			communication.sendMessage(msg);
 		}
 	}
@@ -131,17 +162,25 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 	private List<EntityID> parseAssignmentData(String data) {
 		List<EntityID> assignedEntities = new ArrayList<EntityID>();
 		String[] splitData = data.split("_");
-		//System.out.println("splitData size="+splitData.length);
+
 		for(String strId : splitData) {
-			assignedEntities.add(new EntityID(Integer.parseInt(strId)));
+			if(strId.length() > 0) {
+				assignedEntities.add(new EntityID(Integer.parseInt(strId)));
+			}
+			else {
+				System.out.println("splitData size="+splitData.length);
+				System.out.println("strId="+strId);
+			}
 		}
 		return assignedEntities;
 	}
 	
 	//Should be replaced with something from search algorithm
 	private boolean atDestination() {
-		if(currDst.size() > 0 && currDst.get(0) != null) {
-			if(((Human)me()).getPosition().getValue() == currDst.get(0).getValue()) {
+		//if(currDst.size() > 0 && currDst.get(0) != null) {
+		if(currDst != null) {
+			//if(((Human)me()).getPosition().getValue() == currDst.get(0).getValue()) {
+			if(((Human)me()).getPosition().getValue() == currDst.getValue()) {
 				return true;
 			}
 		}
@@ -150,48 +189,63 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 	
 	//Return a path to where to explore
 	protected List<EntityID> explore() {
+		int maxItr = 10;
 		List<EntityID> path = null;
-		if(currDst.size() == 0) {
-				
-			List<EntityID> checked = new ArrayList<EntityID>();
-		
+		checked = new ArrayList<EntityID>();
+		//if(currDst.size() == 0) {
+		if(currDst == null) {
 			//Make sure the path is reachable otherwise pick a new destination
 			while(path == null) {
-				currDst.clear();
-				currDst.add(getNextExplore(checked));
-				checked.add(currDst.get(0));
+				//currDst.clear();
+				//currDst.add(getNextExplore(checked));
+				currDst = getNextExplore();
+				checked.add(currDst);
+				//checked.add(currDst.get(0));
+				//checked.add(currDst);
 				path = search.performSearch(((Human)me()).getPosition(), currDst);
+				maxItr++;
+				if(maxItr == 10) {
+					System.out.println("wtf?");
+					return null;
+				}
 			}
-
+			
 			//Reduce utility of close entities <(reduceUtilDist)
 			if(unexploredEntities.size() > 0) {
 				for(EntityID entity : assignedEntities) {
-					if ((model.getDistance(currDst.get(0), entity) < reduceUtilDist)) {                                                                                                                                                                        
-						updateUtility(entity, currDst.get(0));                                                                                                                                                                                         
+					//if ((model.getDistance(currDst.get(0), entity) < reduceUtilDist)) {                                                                                                                                                                        
+					//	updateUtility(entity, currDst.get(0));                         
+					if ((model.getDistance(currDst, entity) < reduceUtilDist)) {                                                                                                                                                                        
+						updateUtility(entity, currDst);       
 					}
 				}
 			}
 		}
 		else {
 			path = search.performSearch(((Human)me()).getPosition(), currDst);
+			if (path == null) {
+				System.out.println("hmmm");
+			}
 		}
 		return path;
 	}
 	
 	//Next entity to explore, will need some kind of time factor for this to work. I don't want to stop exploring an entity after a one time visit.
-	private EntityID getNextExplore(List<EntityID> checked) {
+	private EntityID getNextExplore() {
 		EntityID next = null;
 		
 		//Poll from the circuit 
         if(unexploredEntities.size() == 0) {
-        	next = explorationCircuit.poll();
-        	explorationCircuit.add(next);
+    		next = explorationCircuit.poll();
+    		explorationCircuit.add(next);
+    		System.out.println("CIrcuit time!");
         	return next;
         }
         //If none of the entities in unexploredEntities can be reached, start walking on the circuit instead.
         if(checked.size() == unexploredEntities.size()) {
-         	next = explorationCircuit.poll();
-        	explorationCircuit.add(next);
+    		next = explorationCircuit.poll();
+    		explorationCircuit.add(next);
+    		System.out.println("CIrcuit time!");
         	return next;
         }
         

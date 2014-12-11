@@ -64,8 +64,8 @@ public class CustomLayer extends StandardViewLayer {
 	public Collection<RenderedObject> render(Graphics2D g,
 			ScreenTransform arg1, int arg2, int arg3) { 
 
-		clusters = Partitioning.clusters;
-		agentsAssignment = Partitioning.lastAgentAssignment;
+		clusters = KMeansPartitioning.clusters;
+		agentsAssignment = HungarianAssignment.lastAgentAssignment;
 		Collection<RenderedObject> objects = new HashSet<RenderedObject>(); 
 		if(clusters != null && agentsAssignment != null) {	
 			for(int i=0; i<clusters.size(); i++) {

@@ -3,8 +3,6 @@ package sample;
 import java.util.Collection;
 import java.util.EnumSet;
 
-import exploration.ExplorationCentre;
-
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.messages.Command;
 import rescuecore2.log.Logger;
@@ -16,7 +14,7 @@ import rescuecore2.standard.entities.StandardEntityURN;
 /**
    A sample centre agent.
  */
-public class SampleCentre extends ExplorationCentre {
+public class SampleCentre extends StandardAgent<Building> {
     @Override
     public String toString() {
         return "Sample centre";
