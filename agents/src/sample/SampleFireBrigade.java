@@ -35,7 +35,7 @@ public class SampleFireBrigade extends ExplorationAgent<FireBrigade> {//Abstract
 
     @Override
     public String toString() {
-        return "Sample fire brigade";
+        return "Sample fire brigade"; 
     }
 
     @Override

@@ -135,13 +135,13 @@ public final class LaunchSampleAgents {
         catch (ComponentConnectionException e) {
             Logger.info("failed: " + e.getMessage());
         }
-        try {
+        /*try {
             Logger.info("Connecting viewer...");
             launcher.connect(new SampleViewer());
             Logger.info("success");
         }
         catch (ComponentConnectionException e) {
         	Logger.info("failed: " + e.getMessage());
-        }
+        }*/
     }
 }

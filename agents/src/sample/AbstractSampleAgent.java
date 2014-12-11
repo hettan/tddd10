@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.Collections;
 import java.util.Map;
 
+import navigation_emil.AvoidBlockadeSearch;
+import navigation_linus.HPAstar;
+
 import rescuecore2.worldmodel.EntityID;
 import rescuecore2.Constants;
 import rescuecore2.log.Logger;
@@ -80,7 +83,7 @@ public abstract class AbstractSampleAgent<E extends StandardEntity> extends Stan
                 refugeIDs.add(next.getID());
             }
         }
-        search = new SampleSearch(model);
+        search = new AvoidBlockadeSearch(model);
         neighbours = search.getGraph();
         useSpeak = config.getValue(Constants.COMMUNICATION_MODEL_KEY).equals(SPEAK_COMMUNICATION_MODEL);
         Logger.debug("Communcation model: " + config.getValue(Constants.COMMUNICATION_MODEL_KEY));
