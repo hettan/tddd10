@@ -34,7 +34,7 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 	private float reduceUtilDist = 20000;
 	//private List<EntityID> currDst;
 	private EntityID currDst;
-	private List<EntityID> checked;
+	private EntityID[] checked;
 	
 	private static boolean first = true;
 	private static boolean gotCommunication = true;
@@ -51,7 +51,7 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 		
 		//currDst = new ArrayList<EntityID>();
 		currDst = null;
-		checked = new ArrayList<EntityID>(2);
+		checked = new EntityID[10];
 	}
 
 	@Override
@@ -104,16 +104,13 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 	protected void think(int time, ChangeSet changed, Collection<Command> heard) {	
 		List<Message> assignmentMessages = communication.getMessages(CommunicationType.ASSIGNMENT, time);		
 		handleAssignmentMessages(assignmentMessages);
-		
+
 		if(atDestination()) {
 			
-			//Re-add to the circuit			
-			if(unexploredEntities.size() > 0) {
-				//EntityID done = currDst.get(0);
-				EntityID done = currDst;
-				explorationCircuit.add(done);
-				unexploredEntities.remove(done);	
-				//currDst.clear();
+			//Add to the circuit			
+			if(!explorationCircuit.contains(currDst)) {
+				explorationCircuit.add(currDst);
+				unexploredEntities.remove(currDst);	
 				currDst = null;
 			}
 		}
@@ -189,9 +186,12 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 	
 	//Return a path to where to explore
 	protected List<EntityID> explore() {
-		int maxItr = 10;
+		if(assignedEntities.size() == 0) {
+			return randomWalk();
+		}
+		
+		int counter = 0;
 		List<EntityID> path = null;
-		checked = new ArrayList<EntityID>();
 		//if(currDst.size() == 0) {
 		if(currDst == null) {
 			//Make sure the path is reachable otherwise pick a new destination
@@ -199,17 +199,21 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 				//currDst.clear();
 				//currDst.add(getNextExplore(checked));
 				currDst = getNextExplore();
-				checked.add(currDst);
+				checked[counter] = currDst;
 				//checked.add(currDst.get(0));
 				//checked.add(currDst);
 				path = search.performSearch(((Human)me()).getPosition(), currDst);
-				maxItr++;
-				if(maxItr == 10) {
+				counter++;
+				if(counter == 10) {
 					System.out.println("wtf?");
+					System.out.println(unexploredEntities.size());
+					System.out.println(explorationCircuit.size());
 					return null;
 				}
 			}
-			
+			for(int i=0; i<counter; i++) {
+				checked[i] = null;
+			}
 			//Reduce utility of close entities <(reduceUtilDist)
 			if(unexploredEntities.size() > 0) {
 				for(EntityID entity : assignedEntities) {
@@ -224,7 +228,15 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 		else {
 			path = search.performSearch(((Human)me()).getPosition(), currDst);
 			if (path == null) {
+				if(unexploredEntities.contains(currDst)) {
+					unexploredEntities.add(currDst);
+				}
+				currDst = null;
+				
 				System.out.println("hmmm");
+				if(unexploredEntities.size() == 0)
+					System.out.println("unexplored entities=0");
+				return explore();		
 			}
 		}
 		return path;
@@ -238,14 +250,12 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
         if(unexploredEntities.size() == 0) {
     		next = explorationCircuit.poll();
     		explorationCircuit.add(next);
-    		System.out.println("CIrcuit time!");
         	return next;
         }
         //If none of the entities in unexploredEntities can be reached, start walking on the circuit instead.
-        if(checked.size() == unexploredEntities.size()) {
+        if(checked.length == unexploredEntities.size()) {
     		next = explorationCircuit.poll();
     		explorationCircuit.add(next);
-    		System.out.println("CIrcuit time!");
         	return next;
         }
         
@@ -253,7 +263,7 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
         Float bestTotal = Float.NEGATIVE_INFINITY;
         for(EntityID entity: unexploredEntities) {
         	//Util - cost
-        	if (!checked.contains(entity)) {
+        	if (!inChecked(entity)) {
         		Float total =  utility.get(entity) - costs.get(entity);
         		if (total > bestTotal) {
         			bestTotal = total;
@@ -262,6 +272,15 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
         	}
         }
         return next;
+	}
+	
+	private boolean inChecked(EntityID id) {
+		for(EntityID check : checked) {
+			if(check != null && check.getValue() == id.getValue()) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	private void updateCosts() {

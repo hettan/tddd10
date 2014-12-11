@@ -50,6 +50,34 @@ public class KMeansPartitioning {
 		return agents;
 	}
 	
+	private Tuple<Integer, Integer> getCenterPoint() {
+		int top = Integer.MIN_VALUE;
+		int bot = Integer.MAX_VALUE;
+		int left = Integer.MAX_VALUE;
+		int right = Integer.MIN_VALUE;
+		
+		for(EntityID eID: getBuildingEntities()) {
+			Pair<Integer, Integer> pos = model.getEntity(eID).getLocation(model);
+			if(pos.first() < left) {
+				left = pos.first();
+			}
+			else if(pos.first() > right) {
+				right = pos.first();
+			}
+			if(pos.second() < bot) {
+				bot = pos.second();
+			}
+			else if(pos.second() > top) {
+				
+			}	top = pos.second();
+		}
+		
+		Tuple<Integer, Integer> center = new Tuple<Integer, Integer>(); 
+		center.first = Math.abs(left-right)/2;
+		center.second = Math.abs(bot-top)/2;
+		return center;
+	}
+	
 	public List<Tuple<Integer,Integer>> getClustersKMeans() {
 		int numClusters = getNumClusters();
 		List<EntityID> entities = getBuildingEntities();
@@ -57,9 +85,10 @@ public class KMeansPartitioning {
 		if(communication) {
 			clusterCenters = new ArrayList<Tuple<Integer,Integer>>();
 			//Create random position centers for each cluster
-			int maxX = 409164; //Change these constants later
+			Tuple<Integer, Integer> centerPoint = getCenterPoint();
+			int maxX = centerPoint.first * 2; 
 			int minX = 0;
-			int maxY = 273881; 
+			int maxY = centerPoint.second * 2; 
 			int minY = 0;
 			
 			Random rand = new Random();
@@ -87,6 +116,7 @@ public class KMeansPartitioning {
 			//printClusters(newClusters, clusterCenters);
 		}
 		while(!(sameAssignment(clusters, newClusters)) && ++itrCounter < maxItr);
+		printClusters(clusters, clusterCenters);
 		return clusterCenters;
 	}
 	
