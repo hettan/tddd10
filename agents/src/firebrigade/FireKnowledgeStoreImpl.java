@@ -113,7 +113,7 @@ public class FireKnowledgeStoreImpl implements FireKnowledgeStore {
 				FireArea mergedArea = new FireAreaImpl();
 				for(int k = 0; k < buildingsFirstFireArea.size(); k++)
 				{
-					int buildingIDM =buildingsFirstFireArea.get(k);
+					int buildingIDM = buildingsFirstFireArea.get(k);
 					mergedArea.addFire(buildingIDM);
 				}
 				_fireAreas.remove(firstNearFireArea);
