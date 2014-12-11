@@ -125,11 +125,20 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 				continue;
 			}
 			
-			//Agent and fireArea he has to handle
-			int agent = Integer.parseInt(parts[0]);
-			int fireAreaID = Integer.parseInt(parts[1]);
-			List<FireArea> fireAreas = fireKnowledgeStore.getFireAreas();
-			FireArea fireArea = fireAreas.get(fireAreaID);
+			int fireAreaID = 0;
+			int agent = 0;
+			FireArea fireArea = null;
+			
+			if(parts[0] == "fireSeen ")
+			{
+				//Agent and fireArea he has to handle
+				agent = Integer.parseInt(parts[0]);
+				System.out.println(agent);
+				fireAreaID = Integer.parseInt(parts[1]);
+				System.out.println(agent);
+				List<FireArea> fireAreas = fireKnowledgeStore.getFireAreas();
+				fireArea = fireAreas.get(fireAreaID);			
+			}
 			
 			
 			if (me.getID().getValue() == agent) {
@@ -153,7 +162,6 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 					return;
 				}
 			}
-			
 			
 			int fieryness = 999999999;
 			//Search for building to extinguish
@@ -187,7 +195,7 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 						targetBuilding = burningBuildingEID;
 					}
 				}
-				
+
 				//Go to Building and Extinguish if you are there
 				if (targetBuilding != null) 
 				{
@@ -209,7 +217,6 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 				}
 			}
 			
-			
 			if(nearBuilding)
 			{
 				for (EntityID next3 : changed.getChangedEntities()) {
@@ -222,12 +229,12 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 					}
 				}
 			}
-			
 			// TODO Explore
-			sendRest(time);
+			List<EntityID> path;
+			path = randomWalk();
+            sendMove(time, path);
 		}
 	}
-
 	private List<EntityID> planPathToFire(EntityID targetBuilding) {
         Collection<StandardEntity> targets = model.getObjectsInRange(targetBuilding, maxDistance);
         if (targets.isEmpty()) {

@@ -68,9 +68,10 @@ public class FireKnowledgeStoreImpl implements FireKnowledgeStore {
 	//Checks if the specified building belongs to an exisiting fire area.
 		private FireArea belongsToKnownFireArea(int buildingID)
 		{
-			int firstNearFireArea = 0;
-			int secondNearFireArea = 0;
+			int firstNearFireArea = -1;
+			int secondNearFireArea = -1;
 			int counter=0;
+			System.out.println("Bin Hier");
 			for(int i = 0; i < _fireAreas.size(); i++)
 			{
 				ArrayList<Integer> buildings = new ArrayList<Integer>();
@@ -78,36 +79,43 @@ public class FireKnowledgeStoreImpl implements FireKnowledgeStore {
 				for(int j = 0; j < buildings.size(); j++)
 				{
 					int buildingID2 = buildings.get(j);
+					System.out.println("BuildingID: "+ buildingID);
+					System.out.println("BuildingID2: "+ buildingID2);
 					EntityID bID1 = new EntityID(buildingID);
 					EntityID bID2 = new EntityID(buildingID2);
 					int distanceB = world.getDistance(bID1, bID2);
-					if (distanceB <= 100)
+					System.out.println("Distance: " + distanceB);
+					//TODO TEST
+					if (distanceB <= 35000)
 					{
 						counter++;
 						if (counter==1)
 						{
+							System.out.println("Counter 1");
 							firstNearFireArea = i;
 						}
-						if (counter<=2)
+						if (counter>=2 && i != firstNearFireArea && firstNearFireArea != -1)
 						{
+							System.out.println("Counter 2");
 							secondNearFireArea = i;
 						}
-					}
-				}	
+					}		
+				}
 			}
 			
 			
-			if (counter ==1)
+			if (firstNearFireArea != -1)
 			{
 				return _fireAreas.get(firstNearFireArea);
 			}
 			
-			if (counter <=1)
+			if (secondNearFireArea != -1)
 			{	
 				ArrayList<Integer> buildingsFirstFireArea = new ArrayList<Integer>();
 				buildingsFirstFireArea.addAll(_fireAreas.get(secondNearFireArea).getBuildingsInArea());
 				ArrayList<Integer> buildingsSecondFireArea = new ArrayList<Integer>();
 				buildingsSecondFireArea.addAll(_fireAreas.get(secondNearFireArea).getBuildingsInArea());
+				
 				
 				buildingsFirstFireArea.addAll(buildingsSecondFireArea);
 				FireArea mergedArea = new FireAreaImpl();

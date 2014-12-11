@@ -2,6 +2,9 @@ package sample;
 
 import java.io.IOException;
 
+import firebrigade.FireBrigadeTeam;
+import firebrigade.FireStation;
+
 import rescuecore2.components.ComponentLauncher;
 import rescuecore2.components.TCPComponentLauncher;
 import rescuecore2.components.ComponentConnectionException;
@@ -83,7 +86,7 @@ public final class LaunchSampleAgents {
         try {
             while (fb-- != 0) {
                 Logger.info("Connecting fire brigade " + (i++) + "...");
-                launcher.connect(new SampleFireBrigade());
+                launcher.connect(new FireBrigadeTeam());
                 Logger.info("success");
             }
         }
@@ -114,6 +117,17 @@ public final class LaunchSampleAgents {
             while (true) {
                 Logger.info("Connecting centre " + (i++) + "...");
                 launcher.connect(new SampleCentre());
+                Logger.info("success");
+            }
+        }
+        catch (ComponentConnectionException e) {
+            Logger.info("failed: " + e.getMessage());
+        }
+        try {
+            while (true) {
+                Logger.info("Connecting centre " + (i++) + "...");
+                launcher.connect(new firebrigade.FireStation());
+                System.out.println("Connect FireStation");
                 Logger.info("success");
             }
         }
