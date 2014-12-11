@@ -17,6 +17,7 @@ import communication.Message;
 
 import rescuecore2.messages.Command;
 import rescuecore2.misc.Pair;
+import rescuecore2.standard.entities.Building;
 import rescuecore2.standard.entities.Human;
 import rescuecore2.standard.entities.StandardEntity;
 import rescuecore2.standard.entities.StandardEntityURN;
@@ -103,13 +104,6 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 			assignedEntities.add(new EntityID(Integer.parseInt(str_id)));
 		}
 		return assignedEntities;
-	}
-	
-	//Scan the surroundings *NOT DONE*
-	private HashMap<ScanResultType,EntityID> scanVisual() {
-		HashMap<ScanResultType,EntityID> scanResult = new HashMap<ScanResultType,EntityID>();
-		
-		return scanResult;
 	}
 	
 	//Should be replaced with something from search algorithm

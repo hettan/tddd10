@@ -53,25 +53,25 @@ public class Partitioning {
 			distanceMatrix.add(new ArrayList<Integer>());
 		}
 		
-		System.out.println("Creating matrix");
+		//System.out.println("Creating matrix");
 		//agents x clusterCenters
 		for(int i=0; i<agents.size(); i++) {
-			System.out.print(String.format("%1$12s","Agent #"+i+" |"));
+			//System.out.print(String.format("%1$12s","Agent #"+i+" |"));
 			Pair<Integer, Integer> agentPos = model.getEntity(agents.get(i)).getLocation(model);
 			for(Tuple<Integer, Integer> clusterCenter : clusterCenters) {
 				int distance = eclideanDistance(agentPos.first(), agentPos.second(),
 												clusterCenter.first, clusterCenter.second);
 				
 				distanceMatrix.get(i).add(distance);
-				System.out.print(String.format("%1$9s", distance+"|"));
+				//System.out.print(String.format("%1$9s", distance+"|"));
 			}
-			System.out.println();
+			//System.out.println();
 		}
 		
-		System.out.println("matrix created!");
+		//System.out.println("matrix created!");
 		
 		List<Integer> agentIndexAssignment = hungarianAlgorithm(distanceMatrix);
-		System.out.println("Assignment done!");
+		//System.out.println("Assignment done!");
 		
 		List<EntityID> agentAssignment = new ArrayList<EntityID>();
 		for(int i=0; i<agentIndexAssignment.size(); i++) {
@@ -103,7 +103,7 @@ public class Partitioning {
 		/*for(int i=0; i<assignment.size(); i++){
 			System.out.println("Agent: "+i+"  -  " + assignment.get(i));	
 		}*/
-		System.out.println("Step 1 done!");
+		//System.out.println("Step 1 done!");
 		if(checkAssignment(assignment)) {
 			System.out.println("Assignment OK after step 1");
 			return assignment;
@@ -115,7 +115,7 @@ public class Partitioning {
 			/*for(int i=0; i<assignment.size(); i++){
 				System.out.println("Agent: "+i+"  -  " + assignment.get(i));	
 			}*/
-			System.out.println("Step 2 done!");
+			//System.out.println("Step 2 done!");
 			int counter = 0;
 			while(!checkAssignment(assignment)){
 				// Step 3
@@ -131,7 +131,7 @@ public class Partitioning {
 				counter++;
 		
 			}		
-			System.out.println("Assignment found after "+counter+" times");
+			//System.out.println("Assignment found after "+counter+" times");
 			return assignment;
 		}
 	}
@@ -356,7 +356,7 @@ public class Partitioning {
 		for(StandardEntity entity : this.model.getEntitiesOfType(StandardEntityURN.FIRE_BRIGADE,
        		StandardEntityURN.POLICE_FORCE, 
        		StandardEntityURN.AMBULANCE_TEAM)) {
-			System.out.println(entity.getID());
+			//System.out.println(entity.getID());
 			//Human h = (Human)entity;
 			
 			//if(h.getBuriedness() == 0) {
@@ -400,10 +400,10 @@ public class Partitioning {
 		int maxItr = 10;
 		int itrCounter = 0;
 		List<List<EntityID>> newClusters = clusterEntities(entities, clusterCenters);		
-		System.out.println("first clustering done "+"size="+newClusters.size()+"x"+newClusters.get(0).size());
+		//System.out.println("first clustering done "+"size="+newClusters.size()+"x"+newClusters.get(0).size());
 		//printClusters(newClusters, clusterCenters);
 		do {
-			System.out.println("New clustering! #"+itrCounter +"size="+newClusters.size()+"x"+newClusters.get(0).size());
+			//System.out.println("New clustering! #"+itrCounter +"size="+newClusters.size()+"x"+newClusters.get(0).size());
 			clusters = newClusters;
 			clusterCenters = recalculateClusterCenters(clusters, clusterCenters);			
 			newClusters = clusterEntities(entities, clusterCenters);
@@ -411,7 +411,7 @@ public class Partitioning {
 		}
 		while(!(sameAssignment(clusters, newClusters)) && ++itrCounter < maxItr);
 
-		System.out.println("Clustering done!");
+		//System.out.println("Clustering done!");
 		getAgentAssigment();
 		return newClusters;
 	}
