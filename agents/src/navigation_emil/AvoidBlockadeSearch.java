@@ -64,17 +64,17 @@ public class AvoidBlockadeSearch implements SearchAlgorithm {
 	public List<EntityID> performSearch(EntityID start, EntityID... goals) {
 		StandardEntity startEntity = model.getEntity(start);
 		StandardEntity goalEntity = model.getEntity(getClosestID(start, goals));
-		if(!(startEntity instanceof Area)) return new ArrayList<EntityID>();
-		if(!(goalEntity instanceof Area)) return new ArrayList<EntityID>();
-		
+		if(!(startEntity instanceof Area)) return null;
+		if(!(goalEntity instanceof Area)) return null;
 		PathLenTuple<Area> path = doAreaSearch((Area)startEntity, (Area)goalEntity);
 		
 		List<EntityID> result = new ArrayList<EntityID>();
 		for(Area area : path.getPath()) {
 			result.add(area.getID());
 		}
+	
 		if(result.isEmpty() || result.size() == 1) return null;
-	//	System.out.println("Made avoidBlockadeSearch, length: " + result.size());
+		
 		return result;
 	}
 

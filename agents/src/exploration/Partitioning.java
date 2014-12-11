@@ -79,7 +79,6 @@ public class Partitioning {
 		}
 		
 		for(int i=0; i<agentIndexAssignment.size(); i++){
-			System.out.println("Agent: "+agents.get(i)+"  -  " + agentIndexAssignment.get(i));
 			agentAssignment.set(agentIndexAssignment.get(i), agents.get(i));		
 		}
 		

@@ -21,7 +21,7 @@ import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.worldmodel.EntityID;
 
 public class ExplorationCentre extends StandardAgent<Building>{
-	private List<EntityID> agents;
+	//private List<EntityID> agents;
 	private static boolean first = true;
 	private List<List<EntityID>> clusters;
 	private CommunicationDevice communication;
@@ -35,9 +35,9 @@ public class ExplorationCentre extends StandardAgent<Building>{
             		StandardEntityURN.REFUGE, 
             		StandardEntityURN.HYDRANT,
             		StandardEntityURN.GAS_STATION,
-            		StandardEntityURN.BUILDING);
-            System.out.println("myID = "+this.getID());
-            agents = new ArrayList<EntityID>();
+            		StandardEntityURN.BUILDING,
+            		StandardEntityURN.ROAD);
+            /*agents = new ArrayList<EntityID>();
 
             for (StandardEntity entity : 
             	model.getEntitiesOfType(
@@ -45,19 +45,20 @@ public class ExplorationCentre extends StandardAgent<Building>{
             			StandardEntityURN.FIRE_BRIGADE,
 						StandardEntityURN.AMBULANCE_TEAM)) {
             	agents.add(entity.getID());
-            }
+            }*/
             
             communication = CommunicationFactory.createCommunicationDevice();
             
             //Only first center need to assign the agents
-            if (first) {
+          /*  if (first) {
             	first = false;
         		Partitioning part = new Partitioning(model);
         		clusters = part.getClustersKMeans();
         		
         		List<EntityID> agentsAssignment = part.getAgentAssigment();
         		sendAssignments(agentsAssignment, 0);
-            }
+            	System.out.println("Exploration init done!");
+            }*/
             //clusters = getClusters(agents, 4);
     }
 	
@@ -65,7 +66,6 @@ public class ExplorationCentre extends StandardAgent<Building>{
 		for(int i=0; i<agentsAssignment.size(); i++){
 			Message msg = createAssignmentMessage(agentsAssignment.get(i), clusters.get(i), time);
 			communication.sendMessage(msg);
-			System.out.println("message sent");
 		}
 	}
 		
@@ -94,9 +94,6 @@ public class ExplorationCentre extends StandardAgent<Building>{
 
 	@Override
 	protected void think(int time, ChangeSet changed, Collection<Command> heard) {
-		sendSubscribe(time, 1);	
-		
+		sendSubscribe(time, 1);		
 	}
-	
-	
 }
