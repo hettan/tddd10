@@ -116,7 +116,8 @@ public class KMeansPartitioning {
 			//printClusters(newClusters, clusterCenters);
 		}
 		while(!(sameAssignment(clusters, newClusters)) && ++itrCounter < maxItr);
-		printClusters(clusters, clusterCenters);
+		clusters = smallClusterFix(clusters);
+		//printClusters(clusters, clusterCenters);
 		return clusterCenters;
 	}
 	
@@ -237,6 +238,50 @@ public class KMeansPartitioning {
 		int b = ay - by;
 		int c = (int)Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
 		return c;
+	}
+	
+	private int getLargestCluster(List<List<EntityID>> clusters, List<Integer> indexIgnore) {
+		int largest = 0;
+		int indexLargest = -1;
+		for(int i=0; i<clusters.size(); i++) {
+			if(clusters.get(i).size() > largest && !(indexIgnore.contains(i))) {
+				largest = clusters.get(i).size();
+				indexLargest = i;
+			}
+		}
+		return indexLargest;
+	}
+	
+	private int getSmallestCluster(List<List<EntityID>> clusters, List<Integer> indexIgnore) {
+		int smallest = Integer.MAX_VALUE;
+		int indexSmallest = -1;
+		for(int i=0; i<clusters.size(); i++) {
+			if(clusters.get(i).size() < smallest && !(indexIgnore.contains(i))) {
+				smallest = clusters.get(i).size();
+				indexSmallest = i;
+			}
+		}
+		return indexSmallest;
+	}
+	
+	/*
+	 * If a cluster is to small it will add the largest cluster, not yet added by another small cluster,
+	 * to get a bigger cluster for an agent to explore.
+	 */
+	private List<List<EntityID>> smallClusterFix(List<List<EntityID>> clusters) {
+		int minClusterSize = 10;
+		List<Integer> checked = new ArrayList<Integer>();
+		
+		int indexSmallest = getSmallestCluster(clusters, checked);
+		while(clusters.get(indexSmallest).size() < minClusterSize) {
+			
+			int indexLargest = getLargestCluster(clusters, checked);
+			clusters.get(indexSmallest).addAll(clusters.get(indexLargest));
+			
+			checked.add(indexSmallest);
+			checked.add(indexLargest);
+		}	
+		return clusters;
 	}
 	
 	private void printClusters(List<List<EntityID>> clusters, List<Tuple<Integer,Integer>> clusterCenters) {

@@ -32,13 +32,12 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 	private HashMap<EntityID, Float> costs;
 	private CommunicationDevice communication;
 	private float reduceUtilDist = 20000;
-	//private List<EntityID> currDst;
 	private EntityID currDst;
 	private EntityID[] checked;
+	private int CHECKED_SIZE = 10;
 	
 	private static boolean first = true;
-	private static boolean gotCommunication = true;
-	//private List<List<EntityID>> clusters;
+	private static boolean gotCommunication = false;
 	private KMeansPartitioning partitioning;
 	private HungarianAssignment assignment;
 	
@@ -49,9 +48,8 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 		communication = CommunicationFactory.createCommunicationDevice();
 		communication.register(CommunicationGroup.ALL);
 		
-		//currDst = new ArrayList<EntityID>();
 		currDst = null;
-		checked = new EntityID[10];
+		checked = new EntityID[CHECKED_SIZE];
 	}
 
 	@Override
@@ -83,7 +81,7 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
     		int myIndex = agentsAssignment.indexOf(getID());
     		assignedEntities = partitioning.clusters.get(myIndex);
     		unexploredEntities = assignedEntities;
-    		
+    		System.out.println(getID().getValue() + "Assigned entities size: "+assignedEntities.size());
     		updateCosts();
     		for(EntityID entity : assignedEntities) {
     			utility.put(entity, 1.0f);
@@ -145,7 +143,6 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 	private void handleAssignmentMessages(List<Message> messages) {
 		for(Message msg : messages) {
 			if(msg.dest.contains(getID())) {
-				//System.out.println(msg.data);	
 				assignedEntities = parseAssignmentData(msg.data);		
 			}	
 		}
@@ -174,9 +171,7 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 	
 	//Should be replaced with something from search algorithm
 	private boolean atDestination() {
-		//if(currDst.size() > 0 && currDst.get(0) != null) {
 		if(currDst != null) {
-			//if(((Human)me()).getPosition().getValue() == currDst.get(0).getValue()) {
 			if(((Human)me()).getPosition().getValue() == currDst.getValue()) {
 				return true;
 			}
@@ -192,23 +187,18 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 		
 		int counter = 0;
 		List<EntityID> path = null;
-		//if(currDst.size() == 0) {
 		if(currDst == null) {
 			//Make sure the path is reachable otherwise pick a new destination
 			while(path == null) {
-				//currDst.clear();
-				//currDst.add(getNextExplore(checked));
 				currDst = getNextExplore();
 				checked[counter] = currDst;
-				//checked.add(currDst.get(0));
-				//checked.add(currDst);
 				path = search.performSearch(((Human)me()).getPosition(), currDst);
+				System.out.println(getID().getValue()+ " - DST:? " + currDst.getValue());
 				counter++;
-				if(counter == 10) {
-					System.out.println("wtf?");
-					System.out.println(unexploredEntities.size());
-					System.out.println(explorationCircuit.size());
-					return null;
+				
+				//Some error with finding a path
+				if(counter == CHECKED_SIZE) {
+					return new ArrayList<EntityID>();
 				}
 			}
 			for(int i=0; i<counter; i++) {
@@ -216,9 +206,7 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 			}
 			//Reduce utility of close entities <(reduceUtilDist)
 			if(unexploredEntities.size() > 0) {
-				for(EntityID entity : assignedEntities) {
-					//if ((model.getDistance(currDst.get(0), entity) < reduceUtilDist)) {                                                                                                                                                                        
-					//	updateUtility(entity, currDst.get(0));                         
+				for(EntityID entity : assignedEntities) {                    
 					if ((model.getDistance(currDst, entity) < reduceUtilDist)) {                                                                                                                                                                        
 						updateUtility(entity, currDst);       
 					}
@@ -233,9 +221,6 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 				}
 				currDst = null;
 				
-				System.out.println("hmmm");
-				if(unexploredEntities.size() == 0)
-					System.out.println("unexplored entities=0");
 				return explore();		
 			}
 		}
@@ -247,13 +232,13 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 		EntityID next = null;
 		
 		//Poll from the circuit 
-        if(unexploredEntities.size() == 0) {
+        if(unexploredEntities.size() == 0 && explorationCircuit.size() > 0) {
     		next = explorationCircuit.poll();
     		explorationCircuit.add(next);
         	return next;
         }
         //If none of the entities in unexploredEntities can be reached, start walking on the circuit instead.
-        if(checked.length == unexploredEntities.size()) {
+        if(checked.length == unexploredEntities.size() && explorationCircuit.size() > 0) {
     		next = explorationCircuit.poll();
     		explorationCircuit.add(next);
         	return next;
@@ -296,5 +281,4 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
         Float util = utility.get(buildingInRange) * (1 - (distance / reduceUtilDist));
         utility.put(buildingInRange, util);
      }
-
 }
