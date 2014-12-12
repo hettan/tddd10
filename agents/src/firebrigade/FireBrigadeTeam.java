@@ -21,6 +21,7 @@ import sample.AbstractSampleAgent;
 public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 	private static final String MAX_WATER_KEY = "fire.tank.maximum";
 	private static final String MAX_DISTANCE_KEY = "fire.extinguish.max-distance";
+    private static final String MAX_POWER_KEY = "fire.extinguish.max-sum";
 
 	List<EntityID> internSeenFires = new ArrayList<EntityID>();
 	List<Integer> internToHandleFires = new ArrayList<Integer>();
@@ -33,7 +34,7 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 	private int maxDistance;
     private int maxWater;
 	private int counter = 0;
-    
+    private int maxPower;
     @Override
 	protected void postConnect() {
 		super.postConnect();
@@ -41,6 +42,7 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 				StandardEntityURN.HYDRANT, StandardEntityURN.GAS_STATION);
 		maxWater = config.getIntValue(MAX_WATER_KEY);
 		maxDistance = config.getIntValue(MAX_DISTANCE_KEY);
+		maxPower = config.getIntValue(MAX_POWER_KEY);
 	}
 
 	protected EnumSet<StandardEntityURN> getRequestedEntityURNsEnum() {
@@ -53,8 +55,7 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 		//Initialize
 		if (time == config
 				.getIntValue(kernel.KernelConstants.IGNORE_AGENT_COMMANDS_KEY)) {
-			// Subscribe to channel 1
-			sendSubscribe(time, 3);
+			sendSubscribe(time, 2);
 		}
 		
 		
@@ -62,24 +63,21 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 		int randomNum = 3 + (int)(Math.random()*5);
 		if(counter >= randomNum)
 		{
-			try {
-				boolean busy;
+			
+				int busy;
 				if(targetBuilding != null)
 				{
-					busy = true;
+					busy = 1;
 				}
 				else
 				{
-					busy = false;
+					busy = 0;
 				}
-				String msg = "information " + String.valueOf(me().getX()) + " " + String.valueOf(me().getY()) 
+				String msg = "informations " + String.valueOf(me().getX()) + " " + String.valueOf(me().getY()) + " " 
 						+ String.valueOf(me().getID() + " " + String.valueOf(me().getWater()) + " " + String.valueOf(busy));
 				Logger.debug("Send my position on channel 3 " + msg);
-				sendSpeak(time, 3, msg.getBytes("UTF-8"));
-			} catch (java.io.UnsupportedEncodingException uee) 
-			{
-				Logger.error(uee.getMessage());
-			}
+				sendSpeak(time, 3, msg.getBytes());
+				counter = 0;
 		}
 		counter++;
 		
@@ -93,54 +91,39 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 				{
 					internSeenFires.add(next);
 					//Send seen Fire
-					try 
-					{
-						int nextID = next.getValue();
-						String msg = "fireseen " + String.valueOf(nextID);
-						sendSpeak(time, 3, msg.getBytes("UTF-8"));
-					} 
-						catch (java.io.UnsupportedEncodingException uee) 
-					{
-						Logger.error(uee.getMessage());
-					}
+					int nextID = next.getValue();
+					String msg2 = "fireseen " + String.valueOf(nextID);
+					System.out.println("FireSeen Message: " + msg2);
+					System.out.println("In speak: " + msg2);
+					sendSpeak(time, 3, msg2.getBytes());
 					nearBuilding = true;
 				}
 			}
 		}
 		
 		//Get Messages from Station
-		for (Command next2 : heard) {
-			Logger.debug("Heard " + next2);
-			byte[] content = ((AKSpeak) next2).getContent();
-			String txt = null;
-			try {
-				txt = new String(content, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-
+		int fireAreaID = 0;
+		int agent = 0;
+		FireArea fireArea = null;
+		for (Command next : heard) 
+		{
+			System.out.println("Heard" + next);
+			byte[] content = ((AKSpeak) next).getContent();
+			String txt = new String(content);
+			Logger.error("Heard " + next + txt);
 			String[] parts = txt.split(" ");
-			if (parts.length != 2) {
-				Logger.warn("Ignoring " + txt);
-				continue;
-			}
-			
-			int fireAreaID = 0;
-			int agent = 0;
-			FireArea fireArea = null;
-			
-			if(parts[0] == "fireSeen ")
+				
+			if(parts[0] == "mission ")
 			{
 				//Agent and fireArea he has to handle
 				agent = Integer.parseInt(parts[0]);
-				System.out.println(agent);
 				fireAreaID = Integer.parseInt(parts[1]);
-				System.out.println(agent);
 				List<FireArea> fireAreas = fireKnowledgeStore.getFireAreas();
-				fireArea = fireAreas.get(fireAreaID);			
+				fireArea = fireAreas.get(fireAreaID);	
+				break;
 			}
-			
-			
+		}
+		
 			if (me.getID().getValue() == agent) {
 				internToHandleFires = fireArea.getBuildingsInArea();
 			}
@@ -179,14 +162,12 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 						fierynessTemp = 999999999;
 						//SEND EXTINGUISHED FIRE
 						
-						try {
-							String msg = "extinguishedfire " + String.valueOf(burningBuildingID);
-							Logger.debug("Send my position on channel 3 " + msg);
-							sendSpeak(time, 3, msg.getBytes("UTF-8"));
-						} catch (java.io.UnsupportedEncodingException uee) 
-						{
-							Logger.error(uee.getMessage());
-						}
+						
+						String msg = "extinguishedfire " + String.valueOf(burningBuildingID);
+						Logger.debug("Send my position on channel 3 " + msg);
+						System.out.println("Extinguish Message: " + msg);
+						sendSpeak(time, 3, msg.getBytes());
+
 					}
 					
 					if (fierynessTemp <= fieryness) 
@@ -201,7 +182,7 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 				{
 					if (model.getDistance(me.getID(), targetBuilding) <= maxDistance)
 					{	
-						sendExtinguish(time, targetBuilding, maxWater);
+						sendExtinguish(time, targetBuilding, maxPower);
 						return;
 					}
 					else
@@ -223,7 +204,7 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 					if (buildingIDs.contains(next3)) {
 						Building building = (Building) model.getEntity(next3);
 						if (building.isOnFire()) {
-							sendExtinguish(time, next3, maxWater);
+							sendExtinguish(time, next3, maxPower);
 							return;
 						}
 					}
@@ -234,7 +215,7 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 			path = randomWalk();
             sendMove(time, path);
 		}
-	}
+	
 	private List<EntityID> planPathToFire(EntityID targetBuilding) {
         Collection<StandardEntity> targets = model.getObjectsInRange(targetBuilding, maxDistance);
         if (targets.isEmpty()) {

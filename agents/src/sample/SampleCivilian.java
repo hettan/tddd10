@@ -138,7 +138,7 @@ public class SampleCivilian extends AbstractSampleAgent<Civilian> {
     private void say(String message, int time) {
         try {
             if (useSpeak) {
-                sendSpeak(time, 0, message.getBytes("UTF-8"));
+                //sendSpeak(time, 0, message.getBytes("UTF-8"));
             }
             else {
                 sendSay(time, message.getBytes("UTF-8"));

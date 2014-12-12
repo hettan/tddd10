@@ -20,6 +20,7 @@ import rescuecore2.standard.entities.StandardEntityFactory;
 import rescuecore2.standard.entities.StandardPropertyFactory;
 import rescuecore2.standard.messages.StandardMessageFactory;
 
+
 /**
    Launcher for sample agents. This will launch as many instances of each of the sample agents as possible, all using one connction.
  */
@@ -113,7 +114,7 @@ public final class LaunchSampleAgents {
         catch (ComponentConnectionException e) {
             Logger.info("failed: " + e.getMessage());
         }
-        try {
+        /*try {
             while (true) {
                 Logger.info("Connecting centre " + (i++) + "...");
                 launcher.connect(new SampleCentre());
@@ -122,16 +123,18 @@ public final class LaunchSampleAgents {
         }
         catch (ComponentConnectionException e) {
             Logger.info("failed: " + e.getMessage());
-        }
+        }*/
         try {
             while (true) {
                 Logger.info("Connecting centre " + (i++) + "...");
-                launcher.connect(new firebrigade.FireStation());
                 System.out.println("Connect FireStation");
+                launcher.connect(new FireStation());
+                System.out.println("Success");
                 Logger.info("success");
             }
         }
         catch (ComponentConnectionException e) {
+        	System.out.println("Connect FireStation error:" + e.getMessage());
             Logger.info("failed: " + e.getMessage());
         }
         try {

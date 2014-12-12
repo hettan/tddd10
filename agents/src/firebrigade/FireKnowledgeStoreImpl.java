@@ -71,7 +71,6 @@ public class FireKnowledgeStoreImpl implements FireKnowledgeStore {
 			int firstNearFireArea = -1;
 			int secondNearFireArea = -1;
 			int counter=0;
-			System.out.println("Bin Hier");
 			for(int i = 0; i < _fireAreas.size(); i++)
 			{
 				ArrayList<Integer> buildings = new ArrayList<Integer>();
@@ -79,24 +78,20 @@ public class FireKnowledgeStoreImpl implements FireKnowledgeStore {
 				for(int j = 0; j < buildings.size(); j++)
 				{
 					int buildingID2 = buildings.get(j);
-					System.out.println("BuildingID: "+ buildingID);
-					System.out.println("BuildingID2: "+ buildingID2);
+
 					EntityID bID1 = new EntityID(buildingID);
 					EntityID bID2 = new EntityID(buildingID2);
 					int distanceB = world.getDistance(bID1, bID2);
-					System.out.println("Distance: " + distanceB);
-					//TODO TEST
+	
 					if (distanceB <= 35000)
 					{
 						counter++;
 						if (counter==1)
 						{
-							System.out.println("Counter 1");
 							firstNearFireArea = i;
 						}
 						if (counter>=2 && i != firstNearFireArea && firstNearFireArea != -1)
 						{
-							System.out.println("Counter 2");
 							secondNearFireArea = i;
 						}
 					}		

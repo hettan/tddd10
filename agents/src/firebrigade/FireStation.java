@@ -1,4 +1,5 @@
 package firebrigade;
+
 import java.awt.geom.Rectangle2D;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ import rescuecore2.standard.messages.AKSpeak;
 
 
 public class FireStation extends
-StandardAgent<rescuecore2.standard.entities.AmbulanceCentre>
+StandardAgent<rescuecore2.standard.entities.FireStation>
 {
 	Collection<StandardEntity> agentsInit = new ArrayList<StandardEntity>();
 	List<FireArea> handledFires = new ArrayList<FireArea>();
@@ -40,9 +41,9 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre>
 	DumbRREFPrediction dumbRREFPrediction;
 	boolean busy;
 	FireBrigadeAgent fireBrigadeAgent;
+	private boolean _isInitialized = false;
 	
-	
-	protected void initialize() {
+	protected void initialize(int time) {
 		agentsInit = model.getEntitiesOfType(StandardEntityURN.FIRE_BRIGADE);
 		for(StandardEntity agent2 : agentsInit)
 		{
@@ -51,6 +52,8 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre>
 			FireBrigadeAgent agentFBA = new FireBrigadeAgent(agentID, agentFB.getWater() , false);
 			agents.add(agentFBA);
 		}
+		fireKnowledgeStore = new FireKnowledgeStoreImpl(model);
+		dumbRREFPrediction = new DumbRREFPrediction();
 	}
 	
 	@Override
@@ -62,71 +65,84 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre>
 	@Override
 	protected void think(int time, ChangeSet changed, Collection<Command> heard) 
 	{
+		if(!_isInitialized){
+			initialize(time);
+			_isInitialized = true;
+		}
+		
+		if (time == config
+				.getIntValue(kernel.KernelConstants.IGNORE_AGENT_COMMANDS_KEY)) {
+			sendSubscribe(time, 3);
+		}
+		
 		fireAreas = fireKnowledgeStore.getFireAreas();
+		
 		//Communication
+		
 		for (Command next : heard) 
 		{
-			try 
+			byte[] content = ((AKSpeak) next).getContent();
+			String txt = new String(content);
+			Logger.error("Heard " + next + txt);
+			String[] parts = txt.split(" ");
+			System.out.println("Parts0 = " + parts[0]);
+			switch (parts[0]) 
 			{
-				byte[] content = ((AKSpeak) next).getContent();
-				String txt = new String(content, "UTF-8");
-				Logger.error("Heard " + next + txt);
-				String[] parts = txt.split(" ");
-				switch (parts[0]) 
+				case "informations":
 				{
-					case "informations ":
+					int posX = Integer.parseInt(parts[1]);
+					int posY = Integer.parseInt(parts[2]);
+					int agentID = Integer.parseInt(parts[3]);
+					int waterLevel = Integer.parseInt(parts[4]);
+					int busyInt = Integer.parseInt(parts[5]);
+					System.out.println(parts[0]);
+					for(int k = 0; k < agents.size(); k++)
 					{
-						int posX = Integer.parseInt(parts[1]);
-						int posY = Integer.parseInt(parts[2]);
-						int agentID = Integer.parseInt(parts[3]);
-						int waterLevel = Integer.parseInt(parts[4]);
-						int busyInt = Integer.parseInt(parts[5]);
-						for(int k = 0; k < agents.size(); k++)
+						FireBrigadeAgent agent = agents.get(k);
+						if(agent.getID().getValue() == agentID)
 						{
-							FireBrigadeAgent agent = agents.get(k);
-							if(agent.getID().getValue() == agentID)
+							agent.setPosX(posX);
+							agent.setPosY(posY);
+							agent.setWaterAmount(waterLevel);
+							if(busyInt == 0)
 							{
-								agent.setPosX(posX);
-								agent.setPosY(posY);
-								agent.setWaterAmount(waterLevel);
-								if(busyInt == 0)
-								{
-									agent.setBusy(false);
-								}
-								else
-								{
-									agent.setBusy(true);
-								}
+								agent.setBusy(false);
+							}
+							else
+							{
+								agent.setBusy(true);
 							}
 						}
 					}
-					case "fireseen ": 
-					{
-						int seenFireID = Integer.parseInt(parts[1]);
-						fireKnowledgeStore.foundFire(seenFireID);
-					}
-					case "extinguishedfire ":
-					{
-						int extinguishedFireID = Integer.parseInt(parts[1]);
-						fireKnowledgeStore.extinguishedFire(extinguishedFireID);
-					}
-					default:
-						throw new RuntimeException("Unknown: " + txt);
+					break;
+				}
+				case "fireseen": 
+				{
+					System.out.println("In FireSeen");
+					int seenFireID = Integer.parseInt(parts[1]);
+					fireKnowledgeStore.foundFire(seenFireID);
+					System.out.println(seenFireID);
+					break;
+				}
+				case "extinguishedfire":
+				{
+					int extinguishedFireID = Integer.parseInt(parts[1]);
+					fireKnowledgeStore.extinguishedFire(extinguishedFireID);
+					break;
 				}
 			}
-					catch (UnsupportedEncodingException ex) 
-				{
-					Logger.error(ex.getMessage());
-				}
 		}
 		
+		System.out.println("FireAreas" + fireAreas.size());
 		Map<FireArea, Map<FireBrigade, Double>> costFireArea = new HashMap<FireArea, Map<FireBrigade, Double>>();
 		for(int i = 0; i < fireAreas.size(); i++)
 		{
+			System.out.println("Im here");
 			Map<FireBrigade, Double> costForAgent = new HashMap<FireBrigade, Double>();
 			FireArea area = fireAreas.get(i);
-			if(handledFires.contains(area))
+			if(!handledFires.contains(area))
 			{
+				System.out.println("Im here 2");
 				int fireBrigadesNeeded = dumbRREFPrediction.getPrediction(area);
 				for (FireBrigadeAgent agent : agents) 
 				{
@@ -135,6 +151,7 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre>
 					FireBrigade agentEntity = (FireBrigade) model.getEntity(agent2);
 					agentCost = calculateUtility(agent,fireBrigadesNeeded,area);
 					costForAgent.put(agentEntity, agentCost);
+					System.out.println("Agent: " + agentCost);
 				}
 				costFireArea.put(area, costForAgent);
 				double utilityAreaTemp = 0;
@@ -169,15 +186,9 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre>
 						{
 							fireBrigadeForArea.put(area,areaAgent);
 							handledFires.add(area);
-							//Send GO Extinguish
-							try {
-								String msg = "extinguishedfire " + String.valueOf(areaAgent.getValue()) + " " + String.valueOf(fireAreas.get(i));
-								Logger.debug("Send extinguish Fires " + msg);
-								sendSpeak(time, 3, msg.getBytes("UTF-8"));
-							} catch (java.io.UnsupportedEncodingException uee) 
-							{
-								Logger.error(uee.getMessage());
-							}
+							String msg = "mission " + String.valueOf(areaAgent.getValue()) + " " + String.valueOf(fireAreas.get(i));
+							Logger.debug("Send extinguish Fires " + msg);
+							sendSpeak(time, 2, msg.getBytes());
 						}
 					}
 				}
@@ -187,10 +198,9 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre>
 	
 	private double calculateUtility(FireBrigadeAgent agent,int fireBrigadesNeeded,FireArea area) 
 	{
-		double tempCost = 0;
 		double cost = 0;
-		double fieryness = 0;
-		double fierynessTemp = 0;
+		double temperature = 0;
+		double temperatureTemp = 0;
 		double busy = 0;
 		double distance = 0;
 		double tempDistance;
@@ -206,9 +216,9 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre>
 			int y = buildingEntityB.getY() - agent.getPosY();
 			tempDistance = Math.hypot(x, y) / Math.hypot(bounds.getWidth(), bounds.getHeight());
 			distance =+ tempDistance;
-			
-			fierynessTemp = buildingEntityB.getFieryness();
-			fieryness =+ fierynessTemp;	
+			System.out.println(buildingID);
+			temperatureTemp = buildingEntityB.getTemperature();
+			temperature =+ temperatureTemp;	
 		}
 		double waterLevel = agent.getWaterAmount();
 
@@ -217,7 +227,7 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre>
 			busy =+100;
 		}
 		
-		cost = fieryness / (fieryness +(distance + waterLevel + busy));
+		cost = temperature / (temperature +(distance + waterLevel + busy));
 		return cost;
 	}
 }
