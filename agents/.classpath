@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+<<<<<<< HEAD
 	<classpathentry kind="lib" path="/home/aip11/jacob/tddd10/jars/clear.jar"/>
 	<classpathentry kind="lib" path="/home/aip11/jacob/tddd10/jars/collapse.jar"/>
 	<classpathentry kind="lib" path="/home/aip11/jacob/tddd10/jars/gis2.jar"/>

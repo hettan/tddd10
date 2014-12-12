@@ -142,6 +142,7 @@ public final class LaunchSampleAgents {
         }
         catch (ComponentConnectionException e) {
         	Logger.info("failed: " + e.getMessage());
+
         }
     }
 }
