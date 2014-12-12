@@ -9,16 +9,25 @@ import java.util.ArrayList;
 import java.util.Collection; 
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Random;
+
+import navigation_emil.GridBasedSearch;
+import navigation_emil.SimpleTimer;
 import rescuecore2.misc.gui.ScreenTransform;
 import rescuecore2.standard.entities.Area;
 import rescuecore2.standard.entities.Blockade;
+import rescuecore2.standard.entities.StandardEntity;
 import rescuecore2.standard.entities.StandardWorldModel;
 import rescuecore2.standard.view.StandardViewLayer; 
 import rescuecore2.view.RenderedObject;
 import rescuecore2.worldmodel.Entity;
 import rescuecore2.worldmodel.EntityID;
+import sample.SampleSearch;
+import sample.SearchAlgorithm;
+
 
 
 public class AbstractMapLayer extends StandardViewLayer{
@@ -30,6 +39,40 @@ public class AbstractMapLayer extends StandardViewLayer{
 	private Graphics2D graphics2d;
 	private ArrayList<BorderNode> borderNodes;
 
+	public AbstractMapLayer(StandardWorldModel model, SearchAlgorithm search) {
+		this.model = model;
+		init();
+		/*
+		Collection<StandardEntity> entities = model.getAllEntities();
+		StandardEntity[] eArray = new StandardEntity[entities.size()];
+		eArray = entities.toArray(eArray);
+		int totLen = 0;
+		int notFound = 0;
+		//SearchAlgorithm search = new HPAstar(model);
+		Random rnd = new Random();
+		for(int i = 0; i < 50; i++) {
+
+			EntityID eid1 = eArray[rnd.nextInt(entities.size())].getID();
+			EntityID eid2 = eArray[rnd.nextInt(entities.size())].getID();
+			List<EntityID> resultArray =  search.performSearch(eid1,eid2);
+			if(resultArray != null){
+				int temp = 0;
+				EntityID prev = null;
+				for(EntityID e : resultArray){
+					temp += model.getDistance(e, prev);
+					prev = e;
+				}
+				totLen += temp;
+			} else {
+				notFound++;
+				//System.out.println("First: " + p.first() + " second: " + p.second());
+			}
+		}
+
+		SimpleTimer.printTime();
+		System.out.println("HPAstar längd konstruktor: " + totLen + " notFound : " + notFound);*/
+	}
+	
 	public AbstractMapLayer(StandardWorldModel model) {
 		this.model = model;
 		init();
@@ -49,12 +92,14 @@ public class AbstractMapLayer extends StandardViewLayer{
 		graphics2d = g;
 
 		Collection<RenderedObject> objects = new HashSet<RenderedObject>(); 
-	//	EntityID e1  = new EntityID(33329);
-		
+		//	EntityID e1  = new EntityID(33329);
+
+/*
 		EntityID e1  = new EntityID(32737);
+		//System.out.println("cluster in beginning: " + getCluster((Area)model.getEntity(e1)));
 		//EntityID e2  = new EntityID(15338);
 		EntityID e2  = new EntityID(3714);
-		
+
 		g.setColor(Color.blue);
 		Ellipse2D.Double currentDot = new Ellipse2D.Double(arg1.xToScreen(
 				((Area)model.getEntity(e1)).getX()), arg1.yToScreen(((Area)model.getEntity(e1)).getY()), 10, 10);
@@ -63,25 +108,59 @@ public class AbstractMapLayer extends StandardViewLayer{
 		Ellipse2D.Double currentDot2 = new Ellipse2D.Double(arg1.xToScreen(
 				((Area)model.getEntity(e2)).getX()), arg1.yToScreen(((Area)model.getEntity(e2)).getY()), 10, 10);
 		g.fill(currentDot2);
-		
-		g.setColor(Color.green);
+
+		g.setColor(Color.black);
 		for(BorderNode b : borderNodes){
-			Ellipse2D.Double currentDot21 = new Ellipse2D.Double(arg1.xToScreen(
-					b.road.getX()), arg1.yToScreen(b.road.getY()), 10, 10);
-			g.fill(currentDot21);
-			objects.add(new RenderedObject(null, currentDot21)); 
+			if(b.cluster == 9){
+				Ellipse2D.Double currentDot21 = new Ellipse2D.Double(arg1.xToScreen(
+						b.road.getX()), arg1.yToScreen(b.road.getY()), 10, 10);
+				g.fill(currentDot21);
+				objects.add(new RenderedObject(null, currentDot21)); 
+			}
 		}
-	
+		g.setColor(Color.pink);
+		for(BorderNode b : borderNodes){
+			if(b.cluster == 7){
+				Ellipse2D.Double currentDot21 = new Ellipse2D.Double(arg1.xToScreen(
+						b.road.getX()), arg1.yToScreen(b.road.getY()), 10, 10);
+				g.fill(currentDot21);
+				objects.add(new RenderedObject(null, currentDot21)); 
+			}
+		}
+
+		g.setColor(Color.orange);
+		for(BorderNode b : borderNodes){
+			if(b.cluster == 14){
+				Ellipse2D.Double currentDot21 = new Ellipse2D.Double(arg1.xToScreen(
+						b.road.getX()), arg1.yToScreen(b.road.getY()), 10, 10);
+				g.fill(currentDot21);
+				objects.add(new RenderedObject(null, currentDot21)); 
+			}
+		}
+*/
+		g.setColor(Color.yellow);
+		for(BorderNode b : borderNodes){
+			if(b.cluster == 8){
+				Ellipse2D.Double currentDot21 = new Ellipse2D.Double(arg1.xToScreen(
+						b.road.getX()), arg1.yToScreen(b.road.getY()), 10, 10);
+				g.fill(currentDot21);
+				objects.add(new RenderedObject(null, currentDot21)); 
+			}
+		}
+
+/*
 
 
-		
-System.out.println("before search");
-		HPAstar astar = new HPAstar(model, borderNodes, this);
+		System.out.println("before search");
+		HPAstar astar = new HPAstar(model);
 		ArrayList<EntityID> path = (ArrayList<EntityID>) astar.performSearch(e1, 
 				e2);
 		System.out.println("After search");
 		printPath(path);
-		 
+*/
+
+	
+
 		return objects;
 	}
 
@@ -92,7 +171,7 @@ System.out.println("before search");
 		for(int i = 0; i < borderNodes.size(); i++){//Loop through all bordernodes
 
 			BorderNode borderNode = borderNodes.get(i);	
-			CreateIntraEdge(borderNode);
+			CreateIntraEdge(borderNode, borderNodes);
 		}
 	}
 
@@ -101,9 +180,9 @@ System.out.println("before search");
 	 * @param borderNode
 	 * @return
 	 */
-	public ArrayList<Path> CreateIntraEdge(BorderNode borderNode){
+	public ArrayList<Path> CreateIntraEdge(BorderNode borderNode, ArrayList<BorderNode> borderNodesIn){
 
-		ArrayList<Path>  pArray = breathFirstSearch(borderNode.road, borderNode.cluster, null);
+		ArrayList<Path>  pArray = breathFirstSearch(borderNode.road, borderNode.cluster, null, borderNodesIn);
 		if(!pArray.isEmpty()){ //Means that at least one path is found
 			borderNode.neighbors.addAll(pArray);
 		}
@@ -116,12 +195,15 @@ System.out.println("before search");
 	 * @param borderNode
 	 * @return
 	 */
-	public ArrayList<Path> CreateIntraEdgeConcerningBlockades(BorderNode borderNode){
-
-		ArrayList<Path>  pArray = breathFirstSearch(borderNode.road, borderNode.cluster, null);
+	public ArrayList<Path> CreateIntraEdgeConcerningBlockades(BorderNode borderNode,
+			ArrayList<BorderNode> borderNodesIn){
+		//System.out.println("cluster in end " + borderNode.cluster);
+		ArrayList<Path>  pArray = breathFirstSearch(borderNode.road, borderNode.cluster, null,borderNodesIn);
 		if(!pArray.isEmpty()){ //Means that at least one path is found
+		//	System.out.println(borderNode.cluster + "parray size : " + pArray.size());
 
 			for(Path p : pArray){
+			//	System.out.println(p.dest + " --- " + p.start);
 				int largestBlockade = 1;
 				for(Area a : p.path){
 					int currentBlockade = 1;
@@ -150,9 +232,9 @@ System.out.println("before search");
 	 * @param borderNode
 	 * @return
 	 */
-	public ArrayList<Path> CreateIntraEdge(BorderNode borderNode, Area a){
+	public ArrayList<Path> CreateIntraEdge(BorderNode borderNode, Area a, ArrayList<BorderNode> borderNodesIn){
 
-		ArrayList<Path>  pArray = breathFirstSearch(borderNode.road, borderNode.cluster, a);
+		ArrayList<Path>  pArray = breathFirstSearch(borderNode.road, borderNode.cluster, a, borderNodesIn);
 		if(!pArray.isEmpty()){ //Means that at least one path is found
 			borderNode.neighbors.addAll(pArray);
 		}
@@ -180,7 +262,8 @@ System.out.println("before search");
 	}
 
 	@SuppressWarnings("unchecked")
-	private ArrayList<Path> breathFirstSearch(Area start, int cluster, Area goal) {
+	private ArrayList<Path> breathFirstSearch(Area start, int cluster, Area goal, 
+			ArrayList<BorderNode> borderNodesIn) {
 
 		Queue<Path> priorityQueue = new PriorityQueue<>(20, pathComparator);
 		ArrayList<CheckedArea> checked = new ArrayList<CheckedArea>();
@@ -205,9 +288,18 @@ System.out.println("before search");
 					return returnArray;
 				}
 			} else {
-				for(int k = 0; k < borderNodes.size(); k++){
-					if(cheapestPath.dest == borderNodes.get(k).road){
+				for(int k = 0; k < borderNodesIn.size(); k++){
+					if(cheapestPath.dest == borderNodesIn.get(k).road &&
+							cluster == borderNodesIn.get(k).cluster){
 
+						//Remove old intraedge
+						for(int i  = 0; i < returnArray.size(); i++){
+							if(returnArray.get(i).dest == cheapestPath.dest){
+								returnArray.remove(i);
+								break;
+							}
+						}
+						
 						Path newPath = new Path(cheapestPath.start, cheapestPath.dest);
 						newPath.path = (ArrayList<Area>) cheapestPath.path.clone();
 						newPath.length = cheapestPath.length;
@@ -235,9 +327,7 @@ System.out.println("before search");
 				if(model.getEntity(e) instanceof Area){
 					Area neighbor = (Area) model.getEntity(e);					
 
-					if(meshArrayRectangles.get(cluster).contains(
-							neighbor.getX(), 
-							neighbor.getY())){
+					if(cluster == getCluster(neighbor)){
 
 						int length = cheapestPath.length + 
 								model.getDistance(cheapestPath.dest.getID(), e);
@@ -251,7 +341,7 @@ System.out.println("before search");
 								newPath.path.add(neighbor);
 								newPath.length = length;
 
-								checked.add(new CheckedArea(newPath.length,e));
+								checked.add(new CheckedArea(length,e));
 								priorityQueue.add(newPath);
 								break;
 							}
@@ -367,11 +457,12 @@ System.out.println("before search");
 		int width = right-left;
 		int height = top - bottom;
 
-		for(int x = left; x < right; x += width/6){
+
+		for(int x = left; x < right; x += width/4 +1){
 			Line2D.Double line = new Line2D.Double(x, top, x, bottom);
 			lineList.add(line);
 		}
-		for(int y = bottom; y < top; y += height/6){
+		for(int y = bottom; y < top; y += height/4 +1){
 			Line2D.Double line = new Line2D.Double(right, y, left, y);
 			lineList.add(line);
 		}
@@ -420,8 +511,8 @@ System.out.println("before search");
 		}
 
 		//Create meshArray Rectangles
-		for(int x = left; x < right; x += width/6 +1 ){
-			for(int y = bottom; y < top; y += height/6 +1){
+		for(int x = left; x < right; x += width/4 +1 ){
+			for(int y = bottom; y < top; y += height/4 +1){
 				Rectangle2D.Double rectangle = new Rectangle2D.Double(x, 
 						y, 
 						width/4, 
@@ -434,12 +525,12 @@ System.out.println("before search");
 		for(Area a : borderAreas){
 			cluster = getCluster(a);
 			BorderNode newBorderNode = new BorderNode(cluster, a);
-			borderNodes.add(newBorderNode);
 			for(Path p : interEdges){
 				if(p.start == a){
 					newBorderNode.neighbors.add(p);
 				}
 			}
+			borderNodes.add(newBorderNode);
 		}
 
 		CreateIntraEdges();

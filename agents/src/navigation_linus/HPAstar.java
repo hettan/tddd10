@@ -1,5 +1,8 @@
 package navigation_linus;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -11,6 +14,7 @@ import java.util.Queue;
 import java.util.Set;
 
 import rescuecore2.misc.collections.LazyMap;
+import rescuecore2.misc.gui.ScreenTransform;
 import rescuecore2.standard.components.StandardViewer;
 import rescuecore2.standard.entities.Area;
 import rescuecore2.standard.entities.StandardWorldModel;
@@ -23,14 +27,22 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 	private StandardWorldModel model;
 	private AbstractMapLayer mapLayer;
 	private Map<EntityID, Set<EntityID>> graph;
+	private ScreenTransform arg1;
+	private Graphics2D g;
 
 	/**
 	 * Standard constructor
 	 * @param modelIn
+	 * @param g 
+	 * @param arg1 
+	 * @param abstractMapLayer 
+	 * @param borderNodes 
 	 */
 	public HPAstar(StandardWorldModel modelIn) {
 		model = modelIn;
-		mapLayer = new AbstractMapLayer(model);
+		mapLayer = new AbstractMapLayer(model,this);
+	//	this.g = g;
+	//	this.arg1 = arg1;
 
 		//System.out.println("agent using HPAstar search");
 
@@ -73,16 +85,15 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 		initPath.heuristic = manhattanDistance(start, goalAreas);
 		priorityQueue.add(initPath);
 		checked.add(new CheckedArea(0,start.getID()));
-		ArrayList<BorderNode> borderNodes = (ArrayList<BorderNode>) mapLayer.getBorderNodes().clone();
+		ArrayList<BorderNode> borderNodes = (ArrayList<BorderNode>) mapLayer.getBorderNodes();
 
 		//Add startNode to abstractMap
 		BorderNode startNode = null;
 		if(!mapLayer.isBorderNode(start)){
-			System.out.println("start is not bordernode");
 			int cluster = mapLayer.getCluster(start);
 			startNode = new BorderNode(cluster, start);
 
-			mapLayer.CreateIntraEdgeConcerningBlockades(startNode);
+			ArrayList<Path> temp = mapLayer.CreateIntraEdgeConcerningBlockades(startNode,borderNodes);
 
 			//mapLayer.addBorderNode(startNode);
 			borderNodes.add(startNode);
@@ -93,19 +104,18 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 		ArrayList<ArrayList<Path>> tempPaths = new ArrayList<ArrayList<Path>>();
 		for(Area a : goalAreas){
 			if(!mapLayer.isBorderNode(a)){
-				System.out.println("start is not bordernode");
+			//	System.out.println("start is not bordernode");
 				int cluster = mapLayer.getCluster(a);
 				BorderNode goalNode = new BorderNode(cluster, a);
-			//	mapLayer.addBorderNode(goalNode);
-				mapLayer.CreateIntraEdge(goalNode);
+				//	mapLayer.addBorderNode(goalNode);
+				mapLayer.CreateIntraEdge(goalNode,borderNodes);
 				borderNodes.add(goalNode);
-				
 
 				goals.add(goalNode);
 
 				for(BorderNode b : borderNodes){
 					if(b.cluster == cluster){
-						tempPaths.add(mapLayer.CreateIntraEdge(b, a));
+						tempPaths.add(mapLayer.CreateIntraEdge(b, a, borderNodes));
 					}
 				}
 			}
@@ -138,6 +148,10 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 
 			if(cheapestNode != null){
 				for(Path p : cheapestNode.neighbors){
+					/*	g.setColor(Color.green);
+					Ellipse2D.Double currentDot21 = new Ellipse2D.Double(arg1.xToScreen(
+							p.dest.getX()), arg1.yToScreen(p.dest.getY()), 10, 10);
+					g.fill(currentDot21);*/
 
 					int length = cheapestPath.length + p.length;
 
@@ -166,7 +180,7 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 						newPath.path.addAll(p.path);
 						newPath.length = length;
 						newPath.heuristic = manhattanDistance(p.dest,goalAreas);
-						
+
 						//Remove longer paths with the same dest
 						ArrayList<Path> tempArray = new ArrayList<Path>();
 						for(Path path : priorityQueue){
@@ -177,16 +191,15 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 						for(Path path : tempArray){
 							priorityQueue.remove(path);
 						}
-						
+
 						//Add new path
-						priorityQueue.add(newPath);
-						
+						priorityQueue.add(newPath);			
 					}
 				}
 			}
 		}
-		
-		//removeTempBorders(startNode, goals, tempPaths, borderNodes);
+
+		removeTempBorders(startNode, goals, tempPaths, borderNodes);
 		//System.out.println("path is not found!");
 
 		return null;
