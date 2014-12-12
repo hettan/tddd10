@@ -37,7 +37,7 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 	private int CHECKED_SIZE = 10;
 	
 	private static boolean first = true;
-	private static boolean gotCommunication = false;
+	private static boolean gotCommunication = true;
 	private KMeansPartitioning partitioning;
 	private HungarianAssignment assignment;
 	
@@ -193,7 +193,6 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 				currDst = getNextExplore();
 				checked[counter] = currDst;
 				path = search.performSearch(((Human)me()).getPosition(), currDst);
-				System.out.println(getID().getValue()+ " - DST:? " + currDst.getValue());
 				counter++;
 				
 				//Some error with finding a path

@@ -1,31 +1,20 @@
 
 
 package exploration;
-import java.awt.Color; 
-import java.awt.Graphics2D; 
-import java.awt.Polygon; 
-import java.awt.Shape;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
-import java.util.Collection; 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
 import rescuecore2.misc.Pair;
 import rescuecore2.misc.gui.ScreenTransform;
-import rescuecore2.standard.entities.Area;
-import rescuecore2.standard.entities.Building;
-import rescuecore2.standard.entities.Edge;
-import rescuecore2.standard.entities.Road;
-import rescuecore2.standard.entities.StandardEntity;
-import rescuecore2.standard.entities.StandardEntityURN;
 import rescuecore2.standard.entities.StandardWorldModel;
-import rescuecore2.standard.view.StandardViewLayer; 
+import rescuecore2.standard.view.StandardViewLayer;
 import rescuecore2.view.RenderedObject;
-import rescuecore2.worldmodel.Entity;
 import rescuecore2.worldmodel.EntityID;
-import sample.SampleCentre;
 //./start.sh -m ../maps/Kobe2013-all-ambulances/map -c ../maps/Kobe2013-all-ambulances/config/ --disable-traffic-sim --disable-fire-sim --use-static-civilians
 public class CustomLayer extends StandardViewLayer {
 
