@@ -137,10 +137,10 @@ public class AbstractMapLayer extends StandardViewLayer{
 				objects.add(new RenderedObject(null, currentDot21)); 
 			}
 		}
-
+*/
 		g.setColor(Color.yellow);
 		for(BorderNode b : borderNodes){
-			if(b.cluster == 15){
+			if(b.cluster == 8){
 				Ellipse2D.Double currentDot21 = new Ellipse2D.Double(arg1.xToScreen(
 						b.road.getX()), arg1.yToScreen(b.road.getY()), 10, 10);
 				g.fill(currentDot21);
@@ -200,10 +200,10 @@ public class AbstractMapLayer extends StandardViewLayer{
 		//System.out.println("cluster in end " + borderNode.cluster);
 		ArrayList<Path>  pArray = breathFirstSearch(borderNode.road, borderNode.cluster, null,borderNodesIn);
 		if(!pArray.isEmpty()){ //Means that at least one path is found
-			//System.out.println("parray size : " + pArray.size());
+		//	System.out.println(borderNode.cluster + "parray size : " + pArray.size());
 
 			for(Path p : pArray){
-
+			//	System.out.println(p.dest + " --- " + p.start);
 				int largestBlockade = 1;
 				for(Area a : p.path){
 					int currentBlockade = 1;
@@ -292,6 +292,14 @@ public class AbstractMapLayer extends StandardViewLayer{
 					if(cheapestPath.dest == borderNodesIn.get(k).road &&
 							cluster == borderNodesIn.get(k).cluster){
 
+						//Remove old intraedge
+						for(int i  = 0; i < returnArray.size(); i++){
+							if(returnArray.get(i).dest == cheapestPath.dest){
+								returnArray.remove(i);
+								break;
+							}
+						}
+						
 						Path newPath = new Path(cheapestPath.start, cheapestPath.dest);
 						newPath.path = (ArrayList<Area>) cheapestPath.path.clone();
 						newPath.length = cheapestPath.length;
