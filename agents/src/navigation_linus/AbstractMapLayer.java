@@ -72,7 +72,7 @@ public class AbstractMapLayer extends StandardViewLayer{
 		SimpleTimer.printTime();
 		System.out.println("HPAstar längd konstruktor: " + totLen + " notFound : " + notFound);*/
 	}
-	
+
 	public AbstractMapLayer(StandardWorldModel model) {
 		this.model = model;
 		init();
@@ -94,7 +94,7 @@ public class AbstractMapLayer extends StandardViewLayer{
 		Collection<RenderedObject> objects = new HashSet<RenderedObject>(); 
 		//	EntityID e1  = new EntityID(33329);
 
-/*
+		/*
 		EntityID e1  = new EntityID(32737);
 		//System.out.println("cluster in beginning: " + getCluster((Area)model.getEntity(e1)));
 		//EntityID e2  = new EntityID(15338);
@@ -137,7 +137,7 @@ public class AbstractMapLayer extends StandardViewLayer{
 				objects.add(new RenderedObject(null, currentDot21)); 
 			}
 		}
-*/
+		 */
 		g.setColor(Color.yellow);
 		for(BorderNode b : borderNodes){
 			if(b.cluster == 8){
@@ -148,7 +148,7 @@ public class AbstractMapLayer extends StandardViewLayer{
 			}
 		}
 
-/*
+		/*
 
 
 		System.out.println("before search");
@@ -157,9 +157,9 @@ public class AbstractMapLayer extends StandardViewLayer{
 				e2);
 		System.out.println("After search");
 		printPath(path);
-*/
+		 */
 
-	
+
 
 		return objects;
 	}
@@ -200,10 +200,10 @@ public class AbstractMapLayer extends StandardViewLayer{
 		//System.out.println("cluster in end " + borderNode.cluster);
 		ArrayList<Path>  pArray = breathFirstSearch(borderNode.road, borderNode.cluster, null,borderNodesIn);
 		if(!pArray.isEmpty()){ //Means that at least one path is found
-		//	System.out.println(borderNode.cluster + "parray size : " + pArray.size());
+			//	System.out.println(borderNode.cluster + "parray size : " + pArray.size());
 
 			for(Path p : pArray){
-			//	System.out.println(p.dest + " --- " + p.start);
+				//	System.out.println(p.dest + " --- " + p.start);
 				int largestBlockade = 1;
 				for(Area a : p.path){
 					int currentBlockade = 1;
@@ -289,7 +289,7 @@ public class AbstractMapLayer extends StandardViewLayer{
 				}
 			} else {
 				for(int k = 0; k < borderNodesIn.size(); k++){
-					if(cheapestPath.dest == borderNodesIn.get(k).road &&
+					if(start != cheapestPath.dest && cheapestPath.dest == borderNodesIn.get(k).road &&
 							cluster == borderNodesIn.get(k).cluster){
 
 						//Remove old intraedge
@@ -299,7 +299,7 @@ public class AbstractMapLayer extends StandardViewLayer{
 								break;
 							}
 						}
-						
+
 						Path newPath = new Path(cheapestPath.start, cheapestPath.dest);
 						newPath.path = (ArrayList<Area>) cheapestPath.path.clone();
 						newPath.length = cheapestPath.length;
@@ -312,38 +312,39 @@ public class AbstractMapLayer extends StandardViewLayer{
 
 			//Iterate through neighbors
 			for(EntityID e : cheapestPath.dest.getNeighbours()){
-
-				boolean doesNotExist = true;
-				for(int i = 0; i < checked.size(); i++){
-					if(checked.get(i).area == e){
-						doesNotExist = false;
-						break;
-					}
-				}
-				if(doesNotExist){
-					checked.add(new CheckedArea(Integer.MAX_VALUE,e));
-				}
-
 				if(model.getEntity(e) instanceof Area){
-					Area neighbor = (Area) model.getEntity(e);					
+					boolean doesNotExist = true;
+					for(int i = 0; i < checked.size(); i++){
+						if(checked.get(i).area == e){
+							doesNotExist = false;
+							break;
+						}
+					}
+					if(doesNotExist){
+						checked.add(new CheckedArea(Integer.MAX_VALUE,e));
+					}
 
-					if(cluster == getCluster(neighbor)){
+					if(e != cheapestPath.dest.getID()){
+						Area neighbor = (Area) model.getEntity(e);					
 
-						int length = cheapestPath.length + 
-								model.getDistance(cheapestPath.dest.getID(), e);
+						if(cluster == getCluster(neighbor)){
 
-						for(int i = 0; i < checked.size(); i++){
-							if(checked.get(i).area == e && checked.get(i).length > length){
-								checked.remove(i);
+							int length = cheapestPath.length + 
+									model.getDistance(cheapestPath.dest.getID(), e);
 
-								Path newPath = new Path(start, neighbor);
-								newPath.path = (ArrayList<Area>) cheapestPath.path.clone();
-								newPath.path.add(neighbor);
-								newPath.length = length;
+							for(int i = 0; i < checked.size(); i++){
+								if(checked.get(i).area == e && checked.get(i).length > length){
+									checked.remove(i);
 
-								checked.add(new CheckedArea(length,e));
-								priorityQueue.add(newPath);
-								break;
+									Path newPath = new Path(start, neighbor);
+									newPath.path = (ArrayList<Area>) cheapestPath.path.clone();
+									newPath.path.add(neighbor);
+									newPath.length = length;
+
+									checked.add(new CheckedArea(length,e));
+									priorityQueue.add(newPath);
+									break;
+								}
 							}
 						}
 					}
