@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 
+import exploration.ExplorationAgent;
+
 import rescuecore2.worldmodel.EntityID;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.messages.Command;
@@ -22,7 +24,7 @@ import rescuecore2.standard.entities.Refuge;
 /**
    A sample ambulance team agent.
  */
-public class SampleAmbulanceTeam extends AbstractSampleAgent<AmbulanceTeam> {
+public class SampleAmbulanceTeam extends ExplorationAgent<AmbulanceTeam> {//AbstractSampleAgent<AmbulanceTeam> {
     private Collection<EntityID> unexploredBuildings;
 
     @Override
@@ -39,6 +41,9 @@ public class SampleAmbulanceTeam extends AbstractSampleAgent<AmbulanceTeam> {
 
     @Override
     protected void think(int time, ChangeSet changed, Collection<Command> heard) {
+    	super.think(time, changed, heard);
+        sendMove(time, explore());
+        /*
         if (time == config.getIntValue(kernel.KernelConstants.IGNORE_AGENT_COMMANDS_KEY)) {
             // Subscribe to channel 1
             sendSubscribe(time, 1);
@@ -102,8 +107,12 @@ public class SampleAmbulanceTeam extends AbstractSampleAgent<AmbulanceTeam> {
             sendMove(time, path);
             return;
         }
+        
+        
+
+        /*
         Logger.info("Moving randomly");
-        sendMove(time, randomWalk());
+        sendMove(time, randomWalk()); */
     }
 
     @Override

@@ -135,4 +135,18 @@ public final class SampleSearch {
     private boolean isGoal(EntityID e, Collection<EntityID> test) {
         return test.contains(e);
     }
+    
+	@Override
+	public List<EntityID> getPriorityNodes() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public List<EntityID> getRemainingPath(List<EntityID> path,
+			EntityID currentArea) {
+		// TODO Auto-generated method stub
+		return path;
+	}
 }

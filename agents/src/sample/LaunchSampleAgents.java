@@ -2,8 +2,13 @@ package sample;
 
 import java.io.IOException;
 
+<<<<<<< HEAD
 import firebrigade.FireBrigadeTeam;
 import firebrigade.FireStation;
+=======
+import exploration.CustomLayer;
+import navigation_emil.GBSViewer;
+>>>>>>> remotes/origin/exploration
 
 import rescuecore2.components.ComponentLauncher;
 import rescuecore2.components.TCPComponentLauncher;
@@ -65,6 +70,7 @@ public final class LaunchSampleAgents {
                 }
             }
             // CHECKSTYLE:ON:ModifiedControlVariable
+            System.out.println("Host: " + host + ":" + port + "\nConfig: " + config);
             ComponentLauncher launcher = new TCPComponentLauncher(host, port, config);
             connect(launcher, fb, pf, at, config);
         }
@@ -84,6 +90,7 @@ public final class LaunchSampleAgents {
 
     private static void connect(ComponentLauncher launcher, int fb, int pf, int at, Config config) throws InterruptedException, ConnectionException {
         int i = 0;
+        int connectedAgents = 0;
         try {
             while (fb-- != 0) {
                 Logger.info("Connecting fire brigade " + (i++) + "...");
@@ -155,7 +162,6 @@ public final class LaunchSampleAgents {
         catch(ComponentConnectionException e)
         {
 
-            Logger.info("failed: " + e.getMessage());
         }
     }
 }
