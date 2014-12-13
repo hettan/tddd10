@@ -14,7 +14,7 @@ import firebrigade.prediction.training.genetics.GeneticsManager;
 
 public class TrainingConductor {
 
-	private final int AMOUNT_OF_WORKERS_GENERATION = 3;
+	private final int AMOUNT_OF_WORKERS_GENERATION = 1;
 	private final int BASE_PORT = 8000;
 	private final String HOST = "localhost";
 	private int getPort(int offset)

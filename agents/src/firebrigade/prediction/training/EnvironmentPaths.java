@@ -1,7 +1,7 @@
 package firebrigade.prediction.training;
 
 public class EnvironmentPaths {
-	public static final String PROJECT_ROOT_PATH = "/home/jocke/git/tddd10";
+	public static final String PROJECT_ROOT_PATH = "/home/aip11/jacob/tddd10";
 	public static final String FBPREDICTION_RESOURCES_PATH = PROJECT_ROOT_PATH + "/FBPrediction-resources";
 	public static final String AGENTS_PROJECT_PATH = PROJECT_ROOT_PATH + "/agents";
 	public static final String RESCUE_SIMULATOR_PATH = PROJECT_ROOT_PATH + "/RescueSimulator";
