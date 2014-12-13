@@ -137,12 +137,10 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 		Map<FireArea, Map<FireBrigade, Double>> costFireArea = new HashMap<FireArea, Map<FireBrigade, Double>>();
 		for(int i = 0; i < fireAreas.size(); i++)
 		{
-			System.out.println("Im here");
 			Map<FireBrigade, Double> costForAgent = new HashMap<FireBrigade, Double>();
 			FireArea area = fireAreas.get(i);
 			if(!handledFires.contains(area))
 			{
-				System.out.println("Im here 2");
 				int fireBrigadesNeeded = dumbRREFPrediction.getPrediction(area);
 				for (FireBrigadeAgent agent : agents) 
 				{
@@ -217,7 +215,9 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 			tempDistance = Math.hypot(x, y) / Math.hypot(bounds.getWidth(), bounds.getHeight());
 			distance =+ tempDistance;
 			System.out.println(buildingID);
-			temperatureTemp = buildingEntityB.getTemperature();
+			if(buildingEntityB != null){
+				temperatureTemp = buildingEntityB.getTemperature();
+			}
 			temperature =+ temperatureTemp;	
 		}
 		double waterLevel = agent.getWaterAmount();

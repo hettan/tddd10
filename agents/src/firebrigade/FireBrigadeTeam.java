@@ -107,7 +107,7 @@ public class FireBrigadeTeam extends AbstractSampleAgent<FireBrigade> {
 		FireArea fireArea = null;
 		for (Command next : heard) 
 		{
-			System.out.println("Heard" + next);
+			System.out.println("Heard HEzflkafn" + next);
 			byte[] content = ((AKSpeak) next).getContent();
 			String txt = new String(content);
 			Logger.error("Heard " + next + txt);
