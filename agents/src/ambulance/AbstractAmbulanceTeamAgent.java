@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import commlib.components.AbstractCSAgent;
 
 import rescuecore2.Constants;
 import rescuecore2.log.Logger;
@@ -22,7 +21,7 @@ import rescuecore2.standard.kernel.comms.StandardCommunicationModel;
 import rescuecore2.worldmodel.EntityID;
 import sample.SampleSearch;
 
-public abstract class AbstractAmbulanceTeamAgent <E extends StandardEntity> extends AbstractCSAgent<E> {
+public abstract class AbstractAmbulanceTeamAgent <E extends StandardEntity> extends StandardAgent<E> {
     private static final int RANDOM_WALK_LENGTH = 50;
 
     private static final String SAY_COMMUNICATION_MODEL = StandardCommunicationModel.class.getName();
@@ -122,6 +121,5 @@ public abstract class AbstractAmbulanceTeamAgent <E extends StandardEntity> exte
 
 	protected void initialize() {
 		// TODO Auto-generated method stub
-		
 	}
 }

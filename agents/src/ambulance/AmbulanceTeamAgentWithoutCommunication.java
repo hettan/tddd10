@@ -23,7 +23,7 @@ import sample.AbstractSampleAgent;
 import sample.DistanceSorter;
 import rescuecore2.standard.messages.AKSpeak;
 
-public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam> {
+public class AmbulanceTeamAgentWithoutCommunication extends AbstractAmbulanceTeamAgent<AmbulanceTeam> {
 	
 	/** The target human to rescue or to load */
 	protected Human targetHuman ;
@@ -69,7 +69,10 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 				.getIntValue(kernel.KernelConstants.IGNORE_AGENT_COMMANDS_KEY)) {
 			// Subscribe to channel 1
 			sendSubscribe(time, 1);
+			//setMessageChannel(1);
 		}
+		//RCRSCSMessage msg1 = receivedMessageList.get(0);
+		//System.out.println("Message: " + msg1.getSendTime());
 		//System.out.println("Time: "+ time);
 		// Look at the fire location
 		for(EntityID next : changed.getChangedEntities()) {
@@ -84,42 +87,30 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 		}
 		
 		//Look at the civilians
-		if(currentTask==AmbulanceTeamTasks.NO_TASK) {
-			for (Human next : getTargets()) {
-				if (next.getPosition().equals(location().getID())) {
-					// Targets in the same place might need rescuing or loading
-					if ((next instanceof Civilian) && !(location() instanceof Refuge)) {
-						//System.out.println("Ambulance found a civilian!!");
-					}
-					if ((next instanceof Civilian) && (next.getDamage()>0 && next.getBuriedness() == 0)
-							&& !(location() instanceof Refuge)) {
-						System.out.println("Ambulance see a civilian in danger !!");
-						internSeenCivilian.add(next.getID());
-						boolean foundSomeone = someoneInSameBuilding();
-						if(foundSomeone) {
-							currentTask=AmbulanceTeamTasks.FOUND_HUMAN;
-							targetHuman = next;
-						}
-//						String msg = "Civilian " + goal.getValue() + " " + foundSomeone + " "+ next.getBuriedness() +
-//								" " + next.getDamage() + " " + next.getHP() + " " + next.getX() + " " + next.getY();
-//						try {
-//							sendSpeak(time, 2, msg.getBytes("UTF-8"));
-//						} catch (UnsupportedEncodingException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//						}
-					}
+		for (Human next : getTargets()) {
+			if (next.getPosition().equals(location().getID())) {
+				// Targets in the same place might need rescuing or loading
+				if ((next instanceof Civilian) && !(location() instanceof Refuge)) {
+					System.out.println("Ambulance found a civilian!!");
+				}
+				if ((next instanceof Civilian) && (next.getBuriedness() > 0
+						|| next.getDamage()>0) && !(location() instanceof Refuge)) {
+					System.out.println("Ambulance see a civilian in danger !!");
+					internSeenCivilian.add(next.getID());
+					boolean foundSomeone = someoneInSameBuilding();
+					//byte msg = internSeenCivilian);
+					//sendSay(time,msg);
+					goal = null;
 				}
 			}
 		}
-			
+		
 		updateUnexploredBuildings(changed);
 		if(me().getBuriedness()>0) {
 			//todo send buriedAgentMessage
-			String msg2 = "buried " + String.valueOf(me().getPosition().getValue());
-			System.out.println("Ambulance is buried and need rescue !");
+			String msg = "buried " + String.valueOf(me().getPosition().getValue());
 			try {
-				sendSpeak(time, 2, msg2.getBytes("UTF-8"));
+				sendSpeak(time, 2, msg.getBytes("UTF-8"));
 			} catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -140,117 +131,117 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 				return;
 		}
 		
-		
-		//todo if at is stuck in blockade send message
-		//currentTask = AmbulanceTeamTasks.STUCK;
-	
-		if (someoneOnBoard()) {
-			//human is dead ?
-			System.out.println("Transporting civilians to refuge");
-			if (targetHuman.getHP() == 0){
-				sendUnload(time);
-				targetHuman = null;
-				currentTask = AmbulanceTeamTasks.NO_TASK;
-			}
-			else {
-				// Am I at a refuge?
-				if (location() instanceof Refuge) {
-					// Unload!
-					Logger.info("Unloading");
-					sendUnload(time);
-					currentTask = AmbulanceTeamTasks.NO_TASK;
-					targetHuman = null;
-					try {
-						String msg1 = "NO_TASK "
-								+ String.valueOf(me().getPosition().getValue());
-						Logger.debug("Send my position on channel 1 " + msg1);
-						System.out.println("Ambulance unload and send position");
-						sendSpeak(time, 2, msg1.getBytes("UTF-8"));
-					} catch (java.io.UnsupportedEncodingException uee) {
-						Logger.error(uee.getMessage());
-					}
-					return;
-				}
-				else
-				{
-					// Move to a refuge
-					List<EntityID> path = search.performSearch(me()
-							.getPosition(), refugeIDs);
-					if (path != null) {
-						Logger.info("Moving to refuge" + targetHuman);
-						System.out.println("Ambulance move to refuge");
-						sendMove(time, path);
-						currentTask = AmbulanceTeamTasks.MOVE_TO_REFUGE;
-						return;
-					}
-					// What do I do now? Might as well carry on and see if we can
-					// dig someone else out.
-					Logger.debug("Failed to plan path to refuge");
-				}
-			}
-					
-		}
-		
 		for (Command next : heard) {
 			byte[] content = ((AKSpeak) next).getContent();
 			String txt = null;
 			try {
 				txt = new String(content, "UTF-8");
 				String[] parts = txt.split(" ");
-				if (parts.length == 0) {
-					Logger.warn("Ignoring " + txt);
-					continue;
-				}
 				switch (parts[0]) {
 				case "Explore": {
 					currentTask = AmbulanceTeamTasks.NO_TASK;
 				}
 				case "SaveAgent": {
-					int agent = Integer.parseInt(parts[1]);
-					int building = Integer.parseInt(parts[2]);
-					if(currentTask == AmbulanceTeamTasks.NO_TASK) {
-						if (agent == me().getID().getValue()) {
-							goal = new EntityID(building);
-							List<EntityID> path = search.performSearch(location()
-									.getID(), goal);
-							sendMove(time, path);
-							System.out.println("Moving to an agent");
-							Logger.error("Moving to an agent");
-							currentTask = AmbulanceTeamTasks.MOVING_TO_HUMAN;
-							//targetHuman = goal;
-						}
-					}
+					currentTask = AmbulanceTeamTasks.MOVING_TO_HUMAN;
+					int valuee = Integer.parseInt(parts[1]);
+					EntityID goall = new EntityID(valuee);
+					goal = goall;
+					//targetHuman = goal;
 					break;
 				}
 				case "SaveCivilian": {
-					int agent = Integer.parseInt(parts[1]);
-					int building = Integer.parseInt(parts[2]);
-					if(currentTask == AmbulanceTeamTasks.NO_TASK) {
-						if (agent == me().getID().getValue()) {
-							goal = new EntityID(building);
-							List<EntityID> path = search.performSearch(location()
-									.getID(), goal);
-							sendMove(time, path);
-							System.out.println("Moving to a civilian");
-							Logger.error("Moving to a civilian");
-							currentTask = AmbulanceTeamTasks.MOVING_TO_HUMAN;
-							//targetHuman = goal;
-						}
-					}
+					currentTask = AmbulanceTeamTasks.MOVING_TO_HUMAN;
+					int valuee = Integer.parseInt(parts[1]);
+					EntityID goall = new EntityID(valuee);
+					goal = goall;
+					//targetHuman = goal;
 					break;
 				}
 				default:
-					//throw new RuntimeException("Unknown: " + txt);
+					throw new RuntimeException("Unknown: " + txt);
 				}
 			} catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+
+			String[] parts = txt.split(" ");
+			
+			int agent = Integer.parseInt(parts[0]);
+			int building = Integer.parseInt(parts[1]);
+			if(currentTask == AmbulanceTeamTasks.NO_TASK) {
+				if (agent == me().getID().getValue()) {
+					goal = new EntityID(building);
+					List<EntityID> path = search.performSearch(location()
+							.getID(), goal);
+					sendMove(time, path);
+					System.out.println("Moving to a civilian");
+					Logger.error("Moving to a civilian");
+					currentTask = AmbulanceTeamTasks.MOVING_TO_HUMAN;
+					//targetHuman = goal;
+					return;
+				}
+			}
+			
 		}
 		
-		if(currentTask == AmbulanceTeamTasks.MOVING_TO_HUMAN) {
+		//todo if at is stuck in blockade send message
+		//currentTask = AmbulanceTeamTasks.STUCK;
+	
+		if (someoneOnBoard()) {
+		//human is dead ?
+		System.out.println("Transporting civilians to refuge");
+		if (targetHuman.getHP() == 0){
+			sendUnload(time);
+			targetHuman = null;
+			currentTask = AmbulanceTeamTasks.NO_TASK;
+			try {
+				String msg = "NO_TASK "
+						+ String.valueOf(me().getPosition().getValue());
+				Logger.debug("Send my position on channel 1 " + msg);
+				sendSpeak(time, 2, msg.getBytes("UTF-8"));
+			} catch (java.io.UnsupportedEncodingException uee) {
+				Logger.error(uee.getMessage());
+			}
 			return;
 		}
+		else {
+			// Am I at a refuge?
+			if (location() instanceof Refuge) {
+				// Unload!
+				Logger.info("Unloading");
+				sendUnload(time);
+				currentTask = AmbulanceTeamTasks.NO_TASK;
+				targetHuman = null;
+				try {
+					String msg = "NO_TASK "
+							+ String.valueOf(me().getPosition().getValue());
+					Logger.debug("Send my position on channel 1 " + msg);
+					sendSpeak(time, 2, msg.getBytes("UTF-8"));
+				} catch (java.io.UnsupportedEncodingException uee) {
+					Logger.error(uee.getMessage());
+				}
+				return;
+			}
+			else
+			{
+				// Move to a refuge
+				List<EntityID> path = search.performSearch(me()
+						.getPosition(), refugeIDs);
+				if (path != null) {
+					Logger.info("Moving to refuge" + targetHuman);
+					System.out.println("Ambulance move to refuge");
+					sendMove(time, path);
+					currentTask = AmbulanceTeamTasks.MOVE_TO_REFUGE;
+					return;
+				}
+				// What do I do now? Might as well carry on and see if we can
+				// dig someone else out.
+				Logger.debug("Failed to plan path to refuge");
+			}
+		}
+				
+	}
 		
 		// Go through targets (sorted by distance) and check for things we can
 		// do
@@ -290,21 +281,12 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 				}
 			}
 		}
-		System.out.println("Ambulance have no task and send position");
-		try {
-			String msg3 = "NO_TASK "
-					+ String.valueOf(me().getPosition().getValue());
-			Logger.debug("Send my position on channel 1 " + msg3);
-			sendSpeak(time, 2, msg3.getBytes("UTF-8"));
-		} catch (java.io.UnsupportedEncodingException uee) {
-			Logger.error(uee.getMessage());
-		}
 		
 		List<EntityID> path = search.performSearch(me().getPosition(),
 				unexploredBuildings);
 		if (path != null) {
 			Logger.info("Searching buildings");
-			System.out.println("Search building");
+			//System.out.println("Search building");
 			sendMove(time, path);
 			currentTask = AmbulanceTeamTasks.NO_TASK;
 			targetHuman = null;

@@ -16,30 +16,56 @@ public class AtTargetSelection {
 	}
 	
 	//Return the cost it take to rescue the human
-	public  Pair<List<Civilian>, List<AmbulanceTeamAgent>>  rescueSelection(List<Civilian> BuriedCivilians,List<AmbulanceTeamAgent> AvailableAmbulanceAgent){
-		double rescuingValue=100;
-		List<Civilian> civilianToSave = new ArrayList<Civilian>();
-		List<AmbulanceTeamAgent> ambulanceToSend = new ArrayList<AmbulanceTeamAgent>();
-		
-		for(AmbulanceTeamAgent next : AvailableAmbulanceAgent)
+//	public  Pair<List<Integer>, List<EntityID>>  rescueSelection(List<Integer> BuriedCivilians,List<EntityID> AvailableAmbulanceAgent){
+//		double rescuingValue=100;
+//		List<Civilian> civilianToSave = new ArrayList<Civilian>();
+//		List<EntityID> ambulanceToSend = new ArrayList<EntityID>();
+//		
+//		for(EntityID next : AvailableAmbulanceAgent)
+//		{
+//			for(Integer next2 : BuriedCivilians)
+//			{
+//				//double victimLifeTime = Math.ceil(next2 / next2.getDamage());
+//				System.out.println("victimLifeTime = "+ victimLifeTime);
+//				//double victimTime = timeOnPathToVictim(next,next2);
+//				//double loadTime = timeToLoadVictim();
+//				//double refugeTime = timeOnPathToRefuge();
+//				//double unloadTime = timeToUnloadVictim();
+//				//double value = victimLifeTime - (victimTime+loadTime+refugeTime+unloadTime);
+//				//if(value<rescuingValue && value >0) {
+//					//rescuingValue = value;
+//					civilianToSave.add(next2);
+//					ambulanceToSend.add(next);
+//				//}
+//			}
+//		}
+//		Pair<List<Civilian>, List<EntityID>> resultPair = new Pair<List<Civilian>, List<EntityID>>(civilianToSave, ambulanceToSend);
+//		return resultPair;
+//	}
+	
+	public int rescueSelectionCivilian(List<Integer> Listbuilding,List<Integer> Listburiedness,List<Integer> 
+	Listdamage,List<Integer> Listhp, List<Integer> ListX, List<Integer> ListY ,List<EntityID> agentsAvailable) {
+		for(EntityID next : agentsAvailable)
 		{
-			for(Civilian next2 : BuriedCivilians)
+			
+		}
+		return 1;
+	}
+	
+	
+	public  Pair<List<EntityID>, List<EntityID>>  rescueAgentSelection(List<EntityID> BuriedCivilians,List<EntityID> AvailableAmbulanceAgent){
+		double rescuingValue=100;
+		List<EntityID> civilianToSave = new ArrayList<EntityID>();
+		List<EntityID> ambulanceToSend = new ArrayList<EntityID>();
+		
+		for(EntityID next : AvailableAmbulanceAgent)
+		{
+			for(EntityID next2 : BuriedCivilians)
 			{
-				double victimLifeTime = Math.ceil(next2.getHP() / next2.getDamage());
-				System.out.println("victimLifeTime = "+ victimLifeTime);
-				double victimTime = timeOnPathToVictim(next,next2);
-				double loadTime = timeToLoadVictim();
-				double refugeTime = timeOnPathToRefuge();
-				double unloadTime = timeToUnloadVictim();
-				double value = victimLifeTime - (victimTime+loadTime+refugeTime+unloadTime);
-				if(value<rescuingValue && value >0) {
-					//rescuingValue = value;
-					civilianToSave.add(next2);
-					ambulanceToSend.add(next);
-				}
+				//BuriedCivilians.
 			}
 		}
-		Pair<List<Civilian>, List<AmbulanceTeamAgent>> resultPair = new Pair<List<Civilian>, List<AmbulanceTeamAgent>>(civilianToSave, ambulanceToSend);
+		Pair<List<EntityID>, List<EntityID>> resultPair = new Pair<List<EntityID>, List<EntityID>>(civilianToSave, ambulanceToSend);
 		return resultPair;
 	}
 	
@@ -50,17 +76,17 @@ public class AtTargetSelection {
 	}
 
 
-	public int timeOnPathToRefuge(AmbulanceTeamAgent next2) {
-		
-	}
-	
-	public int timeToLoadVictim(EntityID humanID) {
-		
-	}
-	
-	public int timeToUnloadVictim(EntityID humanID) {
-		
-	}
+//	public int timeOnPathToRefuge(AmbulanceTeamAgent next2) {
+//		
+//	}
+//	
+//	public int timeToLoadVictim(EntityID humanID) {
+//		
+//	}
+//	
+//	public int timeToUnloadVictim(EntityID humanID) {
+//		
+//	}
 	
 }
 

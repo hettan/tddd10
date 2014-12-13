@@ -15,8 +15,6 @@ public enum AmbulanceTeamTasks {
 	SEARCHING,
 	//AT is moving to a human which need to be rescued
 	MOVING_TO_HUMAN,
-	//Exploring
-	EXPLORING,
 	//AT stuck in blockade
 	STUCK,
 	//AT buried in a building
