@@ -23,11 +23,8 @@ import rescuecore2.worldmodel.EntityID;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.messages.Command;
 import rescuecore2.log.Logger;
-<<<<<<< HEAD
-
 import rescuecore2.standard.entities.Area;
-=======
->>>>>>> remotes/origin/firebrigade-prediction
+
 import rescuecore2.standard.entities.StandardEntity;
 import rescuecore2.standard.entities.StandardEntityURN;
 import rescuecore2.standard.entities.Building;

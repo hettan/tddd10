@@ -26,7 +26,7 @@ public class KMeansPartitioning {
        		StandardEntityURN.HYDRANT,
        		StandardEntityURN.GAS_STATION,
        		StandardEntityURN.BUILDING);
-		System.out.println("num="+getNumClusters());
+		//System.out.println("num="+getNumClusters());
 	}
 
 	private int getNumClusters() {

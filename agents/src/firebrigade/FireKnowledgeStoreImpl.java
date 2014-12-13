@@ -125,8 +125,6 @@ public class FireKnowledgeStoreImpl implements FireKnowledgeStore {
 			}
 			return null;
 		}
-
->>>>>>> firebrigade-new
 	
 	@Override
 	public boolean contains(int buildingID)

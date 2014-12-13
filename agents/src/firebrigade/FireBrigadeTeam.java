@@ -106,8 +106,8 @@ public class FireBrigadeTeam extends ExplorationAgent<FireBrigade> {
 					//Send seen Fire
 					int nextID = next.getValue();
 					String msg = "fireseen " + String.valueOf(nextID) + " " + String.valueOf(building.getTemperature());
-					System.out.println("FireSeen Message: " + msg);
-					System.out.println("In speak: " + msg);
+					//System.out.println("FireSeen Message: " + msg);
+					//System.out.println("In speak: " + msg);
 					//sendSpeak(time, 3, msg2.getBytes());
 					Message message = new Message();
 					message.sender = getID();
@@ -187,7 +187,7 @@ public class FireBrigadeTeam extends ExplorationAgent<FireBrigade> {
 						
 						String msg = "extinguishedfire " + String.valueOf(burningBuildingID);
 						Logger.debug("Send my position on channel 3 " + msg);
-						System.out.println("Extinguish Message: " + msg);
+						//System.out.println("Extinguish Message: " + msg);
 						//sendSpeak(time, 3, msg.getBytes());
 						Message message = new Message();
 						message.sender = getID();

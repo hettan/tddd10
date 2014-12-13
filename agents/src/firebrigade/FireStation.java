@@ -97,7 +97,7 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 			String txt = msg.data;
 			//Logger.error("Heard " + next + txt);
 			String[] parts = txt.split(" ");
-			System.out.println("Parts0 = " + parts[0]);
+			//System.out.println("Parts0 = " + parts[0]);
 			switch (parts[0]) 
 			{
 				case "informations":
@@ -107,7 +107,7 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 					int agentID = Integer.parseInt(parts[3]);
 					int waterLevel = Integer.parseInt(parts[4]);
 					int busyInt = Integer.parseInt(parts[5]);
-					System.out.println(parts[0]);
+					//System.out.println(parts[0]);
 					for(int k = 0; k < agents.size(); k++)
 					{
 						FireBrigadeAgent agent = agents.get(k);
@@ -130,11 +130,11 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 				}
 				case "fireseen": 
 				{
-					System.out.println("In FireSeen");
+					//System.out.println("In FireSeen");
 					int seenFireID = Integer.parseInt(parts[1]);
 					((Building)(model.getEntity(new EntityID(seenFireID)))).setTemperature(Integer.parseInt(parts[2]));
 					fireKnowledgeStore.foundFire(seenFireID);
-					System.out.println(seenFireID);
+					//System.out.println(seenFireID);
 					break;
 				}
 				case "extinguishedfire":
@@ -146,7 +146,7 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 			}
 		}
 		
-		System.out.println("FireAreas" + fireAreas.size());
+		//System.out.println("FireAreas" + fireAreas.size());
 		Map<FireArea, Map<FireBrigade, Double>> costFireArea = new HashMap<FireArea, Map<FireBrigade, Double>>();
 		for(int i = 0; i < fireAreas.size(); i++)
 		{
@@ -162,7 +162,7 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 					FireBrigade agentEntity = (FireBrigade) model.getEntity(agent2);
 					agentCost = calculateUtility(agent,fireBrigadesNeeded,area);
 					costForAgent.put(agentEntity, agentCost);
-					System.out.println("Agent: " + agentCost);
+					//System.out.println("Agent: " + agentCost);
 				}
 				costFireArea.put(area, costForAgent);
 				double utilityAreaTemp = 0;
@@ -236,9 +236,8 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 			int y = buildingEntityB.getY() - agent.getPosY();
 			tempDistance = Math.hypot(x, y) / Math.hypot(bounds.getWidth(), bounds.getHeight());
 			distance =+ tempDistance;
-			System.out.println(buildingID);
+
 			if(buildingEntityB != null){
-				System.out.println(buildingEntityB.getID());
 				temperatureTemp = buildingEntityB.getTemperature();
 			}
 			temperature =+ temperatureTemp;	
