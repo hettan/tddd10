@@ -12,6 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import communication.CommunicationDevice;
+import communication.CommunicationFactory;
+import communication.CommunicationGroup;
+import communication.CommunicationType;
+import communication.Message;
+
 import firebrigade.prediction.DumbRREFPrediction;
 import rescuecore2.standard.messages.AKSpeak;
 import rescuecore2.worldmodel.ChangeSet;
@@ -31,19 +37,23 @@ import rescuecore2.standard.messages.AKSpeak;
 public class FireStation extends
 StandardAgent<rescuecore2.standard.entities.FireStation>
 {
-	Collection<StandardEntity> agentsInit = new ArrayList<StandardEntity>();
-	List<FireArea> handledFires = new ArrayList<FireArea>();
-	List<FireArea> unHandledFires = new ArrayList<FireArea>();
-	List<FireBrigadeAgent> agents = new ArrayList<FireBrigadeAgent>();
-	Map<FireArea, EntityID> fireBrigadeForArea = new HashMap<FireArea, EntityID>();
+	private Collection<StandardEntity> agentsInit = new ArrayList<StandardEntity>();
+	private List<FireArea> handledFires = new ArrayList<FireArea>();
+	private List<FireArea> unHandledFires = new ArrayList<FireArea>();
+	private List<FireBrigadeAgent> agents = new ArrayList<FireBrigadeAgent>();
+	private Map<FireArea, EntityID> fireBrigadeForArea = new HashMap<FireArea, EntityID>();
 	private List<FireArea> fireAreas;
-	FireKnowledgeStore fireKnowledgeStore;
-	DumbRREFPrediction dumbRREFPrediction;
+	private FireKnowledgeStore fireKnowledgeStore;
+	private DumbRREFPrediction dumbRREFPrediction;
 	boolean busy;
-	FireBrigadeAgent fireBrigadeAgent;
+	private FireBrigadeAgent fireBrigadeAgent;
 	private boolean _isInitialized = false;
 	
+	private CommunicationDevice communication;
+	
 	protected void initialize(int time) {
+		communication = CommunicationFactory.createCommunicationDevice();
+		communication.register(CommunicationGroup.FIRESTATION);
 		agentsInit = model.getEntitiesOfType(StandardEntityURN.FIRE_BRIGADE);
 		for(StandardEntity agent2 : agentsInit)
 		{
@@ -78,12 +88,14 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 		fireAreas = fireKnowledgeStore.getFireAreas();
 		
 		//Communication
-		
-		for (Command next : heard) 
-		{
-			byte[] content = ((AKSpeak) next).getContent();
-			String txt = new String(content);
-			Logger.error("Heard " + next + txt);
+		for(Message msg : communication.getMessages(CommunicationType.NOTIFICATION, time)) {
+			
+	//	}
+	//	for (Command next : heard) 
+	//	{
+			//byte[] content = ((AKSpeak) next).getContent();
+			String txt = msg.data;
+			//Logger.error("Heard " + next + txt);
 			String[] parts = txt.split(" ");
 			System.out.println("Parts0 = " + parts[0]);
 			switch (parts[0]) 
@@ -120,6 +132,7 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 				{
 					System.out.println("In FireSeen");
 					int seenFireID = Integer.parseInt(parts[1]);
+					((Building)(model.getEntity(new EntityID(seenFireID)))).setTemperature(Integer.parseInt(parts[2]));
 					fireKnowledgeStore.foundFire(seenFireID);
 					System.out.println(seenFireID);
 					break;
@@ -159,17 +172,19 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 				
 				for(int k = 0; k < agents.size(); k++)
 				{
-					EntityID agentID = new EntityID(k);
+					/*EntityID agentID = new EntityID(k);
 					Iterator<FireBrigade> iterator = costForAgent.keySet().iterator();
 					while(iterator.hasNext())
-					{
+					{*/
+					for(FireBrigade agentID : costForAgent.keySet()) {
 						for(int l = 0; l < fireBrigadesNeeded; l++)
 						{
+							//utilityAreaTemp = costForAgent.get(agentID);
 							utilityAreaTemp = costForAgent.get(agentID);
 							if (utilityAreaTemp <= utilityArea)
 							{
 								utilityArea = utilityAreaTemp;
-								areaAgent = agentID;
+								areaAgent = agentID.getID();
 								if(!areaAgents.contains(areaAgent))
 								{
 									areaAgents.add(areaAgent);
@@ -186,7 +201,14 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 							handledFires.add(area);
 							String msg = "mission " + String.valueOf(areaAgent.getValue()) + " " + String.valueOf(fireAreas.get(i));
 							Logger.debug("Send extinguish Fires " + msg);
-							sendSpeak(time, 2, msg.getBytes());
+							//sendSpeak(time, 2, msg.getBytes());
+							Message message = new Message();
+							message.sender = getID();
+							message.destGroup = CommunicationGroup.FIREBRIGADE;
+							message.time = time;
+							message.type = CommunicationType.REQUEST;
+							message.data = msg;
+							communication.sendMessage(message);
 						}
 					}
 				}
@@ -216,6 +238,7 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 			distance =+ tempDistance;
 			System.out.println(buildingID);
 			if(buildingEntityB != null){
+				System.out.println(buildingEntityB.getID());
 				temperatureTemp = buildingEntityB.getTemperature();
 			}
 			temperature =+ temperatureTemp;	

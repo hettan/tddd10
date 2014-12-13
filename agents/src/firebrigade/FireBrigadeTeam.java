@@ -1,12 +1,9 @@
 package firebrigade;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
-
-import exploration.ExplorationAgent;
 
 import rescuecore2.log.Logger;
 import rescuecore2.messages.Command;
@@ -18,7 +15,12 @@ import rescuecore2.standard.entities.StandardEntityURN;
 import rescuecore2.standard.messages.AKSpeak;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.worldmodel.EntityID;
-import sample.AbstractSampleAgent;
+
+import communication.CommunicationGroup;
+import communication.CommunicationType;
+import communication.Message;
+
+import exploration.ExplorationAgent;
 
 public class FireBrigadeTeam extends ExplorationAgent<FireBrigade> {
 	private static final String MAX_WATER_KEY = "fire.tank.maximum";
@@ -45,6 +47,8 @@ public class FireBrigadeTeam extends ExplorationAgent<FireBrigade> {
 		maxWater = config.getIntValue(MAX_WATER_KEY);
 		maxDistance = config.getIntValue(MAX_DISTANCE_KEY);
 		maxPower = config.getIntValue(MAX_POWER_KEY);
+		
+		communication.register(CommunicationGroup.FIREBRIGADE);
 	}
 
 	protected EnumSet<StandardEntityURN> getRequestedEntityURNsEnum() {
@@ -78,7 +82,14 @@ public class FireBrigadeTeam extends ExplorationAgent<FireBrigade> {
 				String msg = "informations " + String.valueOf(me().getX()) + " " + String.valueOf(me().getY()) + " " 
 						+ String.valueOf(me().getID() + " " + String.valueOf(me().getWater()) + " " + String.valueOf(busy));
 				Logger.debug("Send my position on channel 3 " + msg);
-				sendSpeak(time, 3, msg.getBytes());
+				//sendSpeak(time, 3, msg.getBytes());
+				Message message = new Message();
+				message.sender = getID();
+				message.destGroup = CommunicationGroup.FIRESTATION;
+				message.time = time;
+				message.type = CommunicationType.NOTIFICATION;
+				message.data = msg;
+				communication.sendMessage(message);
 				counter = 0;
 		}
 		counter++;
@@ -94,10 +105,17 @@ public class FireBrigadeTeam extends ExplorationAgent<FireBrigade> {
 					internSeenFires.add(next);
 					//Send seen Fire
 					int nextID = next.getValue();
-					String msg2 = "fireseen " + String.valueOf(nextID);
-					System.out.println("FireSeen Message: " + msg2);
-					System.out.println("In speak: " + msg2);
-					sendSpeak(time, 3, msg2.getBytes());
+					String msg = "fireseen " + String.valueOf(nextID) + " " + String.valueOf(building.getTemperature());
+					System.out.println("FireSeen Message: " + msg);
+					System.out.println("In speak: " + msg);
+					//sendSpeak(time, 3, msg2.getBytes());
+					Message message = new Message();
+					message.sender = getID();
+					message.destGroup = CommunicationGroup.FIRESTATION;
+					message.time = time;
+					message.type = CommunicationType.NOTIFICATION;
+					message.data = msg;
+					communication.sendMessage(message);
 					nearBuilding = true;
 				}
 			}
@@ -107,23 +125,25 @@ public class FireBrigadeTeam extends ExplorationAgent<FireBrigade> {
 		int fireAreaID = 0;
 		int agent = 0;
 		FireArea fireArea = null;
-		for (Command next : heard) 
-		{
-			System.out.println("Heard HEzflkafn" + next);
-			byte[] content = ((AKSpeak) next).getContent();
-			String txt = new String(content);
-			Logger.error("Heard " + next + txt);
+		
+		for(Message msg : communication.getMessages(CommunicationType.REQUEST, time)) {
+		//for (Command next : heard) 
+		//{
+			String txt = msg.data;
+			//byte[] content = ((AKSpeak) next).getContent();
+			//String txt = new String(content);
+			//Logger.error("Heard " + next + txt);
 			String[] parts = txt.split(" ");
 				
-			if(parts[0] == "mission ")
-			{
+			//if(parts[0] == "mission ")
+			//{
 				//Agent and fireArea he has to handle
 				agent = Integer.parseInt(parts[0]);
 				fireAreaID = Integer.parseInt(parts[1]);
 				List<FireArea> fireAreas = fireKnowledgeStore.getFireAreas();
 				fireArea = fireAreas.get(fireAreaID);	
 				break;
-			}
+			//}
 		}
 		
 			if (me.getID().getValue() == agent) {
@@ -168,7 +188,14 @@ public class FireBrigadeTeam extends ExplorationAgent<FireBrigade> {
 						String msg = "extinguishedfire " + String.valueOf(burningBuildingID);
 						Logger.debug("Send my position on channel 3 " + msg);
 						System.out.println("Extinguish Message: " + msg);
-						sendSpeak(time, 3, msg.getBytes());
+						//sendSpeak(time, 3, msg.getBytes());
+						Message message = new Message();
+						message.sender = getID();
+						message.destGroup = CommunicationGroup.FIRESTATION;
+						message.time = time;
+						message.type = CommunicationType.NOTIFICATION;
+						message.data = msg;
+						communication.sendMessage(message);
 
 					}
 					
