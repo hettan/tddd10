@@ -3,12 +3,17 @@ package firebrigade;
 import java.util.ArrayList;
 import java.util.List;
 
+import rescuecore2.standard.entities.StandardWorldModel;
+import rescuecore2.worldmodel.EntityID;
+
 public class FireKnowledgeStoreImpl implements FireKnowledgeStore {
 
 	private List<FireArea> _fireAreas;
+	private StandardWorldModel world;
 	
-	public FireKnowledgeStoreImpl()
+	public FireKnowledgeStoreImpl(StandardWorldModel world)
 	{
+		this.world = world;
 		_fireAreas = new ArrayList<FireArea>();
 	}
 	
@@ -61,10 +66,67 @@ public class FireKnowledgeStoreImpl implements FireKnowledgeStore {
 	}
 	
 	//Checks if the specified building belongs to an exisiting fire area.
-	private FireArea belongsToKnownFireArea(int buildingID)
-	{
-		return null;
-	}
+		private FireArea belongsToKnownFireArea(int buildingID)
+		{
+			int firstNearFireArea = -1;
+			int secondNearFireArea = -1;
+			int counter=0;
+			for(int i = 0; i < _fireAreas.size(); i++)
+			{
+				ArrayList<Integer> buildings = new ArrayList<Integer>();
+				buildings.addAll(_fireAreas.get(i).getBuildingsInArea());
+				for(int j = 0; j < buildings.size(); j++)
+				{
+					int buildingID2 = buildings.get(j);
+
+					EntityID bID1 = new EntityID(buildingID);
+					EntityID bID2 = new EntityID(buildingID2);
+					int distanceB = world.getDistance(bID1, bID2);
+	
+					if (distanceB <= 35000)
+					{
+						counter++;
+						if (counter==1)
+						{
+							firstNearFireArea = i;
+						}
+						if (counter>=2 && i != firstNearFireArea && firstNearFireArea != -1)
+						{
+							secondNearFireArea = i;
+						}
+					}		
+				}
+			}
+			
+			
+			if (firstNearFireArea != -1)
+			{
+				return _fireAreas.get(firstNearFireArea);
+			}
+			
+			if (secondNearFireArea != -1)
+			{	
+				ArrayList<Integer> buildingsFirstFireArea = new ArrayList<Integer>();
+				buildingsFirstFireArea.addAll(_fireAreas.get(secondNearFireArea).getBuildingsInArea());
+				ArrayList<Integer> buildingsSecondFireArea = new ArrayList<Integer>();
+				buildingsSecondFireArea.addAll(_fireAreas.get(secondNearFireArea).getBuildingsInArea());
+				
+				
+				buildingsFirstFireArea.addAll(buildingsSecondFireArea);
+				FireArea mergedArea = new FireAreaImpl();
+				for(int k = 0; k < buildingsFirstFireArea.size(); k++)
+				{
+					int buildingIDM = buildingsFirstFireArea.get(k);
+					mergedArea.addFire(buildingIDM);
+				}
+				_fireAreas.remove(firstNearFireArea);
+				_fireAreas.remove(secondNearFireArea);
+				return mergedArea;
+			}
+			return null;
+		}
+
+>>>>>>> firebrigade-new
 	
 	@Override
 	public boolean contains(int buildingID)

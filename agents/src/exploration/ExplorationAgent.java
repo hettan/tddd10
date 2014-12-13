@@ -30,7 +30,7 @@ public class ExplorationAgent<E extends StandardEntity> extends AbstractSampleAg
 	private Queue<EntityID> explorationCircuit;
 	private HashMap<EntityID, Float> utility;
 	private HashMap<EntityID, Float> costs;
-	private CommunicationDevice communication;
+	protected CommunicationDevice communication;
 	private float reduceUtilDist = 20000;
 	private EntityID currDst;
 	private EntityID[] checked;

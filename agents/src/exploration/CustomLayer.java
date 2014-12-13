@@ -81,15 +81,7 @@ public class CustomLayer extends StandardViewLayer {
 			}
 		}
 		
-		for(int i=0; i<agentsAssignment.size(); i++) {
-			g.setColor(colors.get(i % colors.size()));
-			Pair<Integer, Integer> pos = model.getEntity(agentsAssignment.get(i)).getLocation(model);
-			Ellipse2D.Double dot = new Ellipse2D.Double(
-					arg1.xToScreen(pos.first()-15000),
-					arg1.yToScreen(pos.second()+15000), 30, 30);
-			g.fill(dot);
-			objects.add(new RenderedObject(null, dot));
-		}
+
 		/*for (StandardEntity entity : 
         	model.getEntitiesOfType(StandardEntityURN.POLICE_FORCE, 
         			StandardEntityURN.FIRE_BRIGADE,

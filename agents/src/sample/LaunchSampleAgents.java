@@ -3,6 +3,8 @@ package sample;
 import java.io.IOException;
 
 import exploration.CustomLayer;
+import firebrigade.FireBrigadeTeam;
+import firebrigade.FireStation;
 import navigation_emil.GBSViewer;
 
 import rescuecore2.components.ComponentLauncher;
@@ -88,7 +90,17 @@ public final class LaunchSampleAgents {
         try {
             while (fb-- != 0) {
                 Logger.info("Connecting fire brigade " + (i++) + "...");
-                launcher.connect(new SampleFireBrigade());
+                launcher.connect(new FireBrigadeTeam());
+                Logger.info("success");
+            }
+        }
+        catch (ComponentConnectionException e) {
+            Logger.info("failed: " + e.getMessage());
+        }
+        try {
+            while (fb-- != 0) {
+                Logger.info("Connecting fire brigade station " + (i++) + "...");
+                launcher.connect(new FireStation());
                 Logger.info("success");
             }
         }
