@@ -3,9 +3,6 @@ package navigation_emil;
 import java.util.ArrayList;
 import java.util.List;
 
-import navigation_emil.GridRelaxation.SearchArea;
-import rescuecore2.standard.entities.Area;
-
 public abstract class Searchable<T> implements Comparable<Searchable<T>> {
 	private int id;
 	private double distance;
@@ -32,8 +29,6 @@ public abstract class Searchable<T> implements Comparable<Searchable<T>> {
 		this.children = children;
 	}
 	public void addChild(T child) {
-		if(this.children == null)
-			this.children = new ArrayList<T>();
 		this.children.add(child);
 	}
 	public Searchable(T baseObject, int uniqueId, double distance, double heuristic, Searchable<T> parentNode) {
@@ -42,12 +37,16 @@ public abstract class Searchable<T> implements Comparable<Searchable<T>> {
 		this.parentNode = parentNode;
 		this.id = uniqueId;
 		this.nodeObject = baseObject;
+		this.children = new ArrayList<T>();
 	}
 	public int getUniqueId() {
 		return id;
 	}
 	public Searchable<T> getParent() {
 		return parentNode;
+	}
+	public void setParent(Searchable<T> parent) {
+		parentNode = parent;
 	}
 	public T getNodeObject() {
 		return nodeObject;

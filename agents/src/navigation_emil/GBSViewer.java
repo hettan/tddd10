@@ -7,6 +7,7 @@ import rescuecore2.view.LayerViewComponent;
 import rescuecore2.view.ViewComponent;
 import rescuecore2.view.ViewListener;
 import rescuecore2.view.RenderedObject;
+import rescuecore2.worldmodel.EntityID;
 import rescuecore2.score.ScoreFunction;
 import rescuecore2.Constants;
 import rescuecore2.Timestep;
@@ -28,6 +29,9 @@ import java.util.List;
 import java.text.NumberFormat;
 
 import rescuecore2.standard.components.StandardViewer;
+import rescuecore2.standard.entities.Area;
+import sample.SampleSearch;
+import sample.SearchAlgorithm;
 
 /**
    A simple viewer.
@@ -48,7 +52,11 @@ public class GBSViewer extends StandardViewer {
     private JLabel mapLabel;
     private NumberFormat format;
     
-    private GridBasedSearch gbSearch;
+    private GBSViewLayer gbsLayer;
+    private SearchAlgorithm gbSearch;
+    private SearchAlgorithm sSearch;
+    
+    private EntityID fromId = null;
 
     @Override
     protected void postConnect() {
@@ -113,13 +121,22 @@ public class GBSViewer extends StandardViewer {
         }
         frame.setVisible(true);
         
-        GridBasedSearch gbSearch = new GridBasedSearch(model);
-        viewer.addLayer(new GBSViewLayer(gbSearch, model.getBounds().getBounds()));
+        SimpleTimer.reset("GridBasedSearch init time: ");
+        gbSearch = new GridBasedSearch(model);
+        SimpleTimer.printTime();
+        
+        SimpleTimer.reset("SampleSearch init time: ");
+        sSearch = new SampleSearch(model);
+        SimpleTimer.printTime();
+        
+        gbsLayer = new GBSViewLayer((GridBasedSearch)gbSearch, model.getBounds().getBounds(), model);
+        viewer.addLayer(gbsLayer);
         viewer.addViewListener(new ViewListener() {
                 @Override
                 public void objectsClicked(ViewComponent view, List<RenderedObject> objects) {
                     for (RenderedObject next : objects) {
                         System.out.println(next.getObject());
+                        UpdatePath(next);
                     }
                 }
 
@@ -152,5 +169,28 @@ public class GBSViewer extends StandardViewer {
         ScoreFunction result = instantiate(className, ScoreFunction.class);
         result.initialise(model, config);
         return result;
+    }
+    
+    private void UpdatePath(RenderedObject clicked) {
+    	if(clicked.getObject() instanceof Area) {
+    		if(fromId == null) {
+    			fromId = ((Area) clicked.getObject()).getID();
+    		} else {
+	    		EntityID toId = ((Area) clicked.getObject()).getID();
+	    		
+	    		SimpleTimer.reset("GridBasedSearch run-time: ");
+	    		List<EntityID> gbPath = gbSearch.performSearch(fromId, toId);
+	    		SimpleTimer.printTime();
+	    		
+	    		SimpleTimer.reset("SampleSearch run-time: ");
+	    		List<EntityID> sPath = sSearch.performSearch(fromId, toId);
+	    		SimpleTimer.printTime();
+	    		
+	    		gbsLayer.SetPaths(gbPath, sPath);
+	    		
+	    		viewer.repaint();
+	    		fromId = null;
+    		}
+    	}
     }
 }
