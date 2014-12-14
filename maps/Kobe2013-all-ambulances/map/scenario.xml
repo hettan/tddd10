@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<scenario:scenario xmlns:scenario="urn:roborescue:map:scenario">
+  <scenario:ambulancecentre scenario:location="20337"/>
+  <scenario:refuge scenario:location="20337"/>
+  <scenario:refuge scenario:location="28953"/>
+  <scenario:ambulanceteam scenario:location="317"/>
+  <scenario:ambulanceteam scenario:location="34008"/>
+  <scenario:ambulanceteam scenario:location="32980"/>
+  <scenario:ambulanceteam scenario:location="28303"/>
+  <scenario:ambulanceteam scenario:location="6522"/>
+  <scenario:ambulanceteam scenario:location="33449"/>
+  <scenario:ambulanceteam scenario:location="6099"/>
+  <scenario:ambulanceteam scenario:location="35332"/>
+  <scenario:ambulanceteam scenario:location="19306"/>
+  <scenario:ambulanceteam scenario:location="33038"/>
+  <scenario:ambulanceteam scenario:location="23808"/>
+  <scenario:ambulanceteam scenario:location="32857"/>
+  <scenario:ambulanceteam scenario:location="34187"/>
+  <scenario:ambulanceteam scenario:location="19695"/>
+  <scenario:ambulanceteam scenario:location="5829"/>
+  <scenario:ambulanceteam scenario:location="32986"/>
+  <scenario:ambulanceteam scenario:location="26421"/>
+  <scenario:ambulanceteam scenario:location="21733"/>
+</scenario:scenario>

@@ -343,7 +343,6 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 		}
 		return returnArray;
 	}
-
 	/**
 	 * Sorry I had to edit in your file. But I felt i had to do this so I could keep the master branch in a working state ;)
 	 * Regards,

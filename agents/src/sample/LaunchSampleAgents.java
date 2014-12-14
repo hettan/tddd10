@@ -1,11 +1,13 @@
 package sample;
 
 import java.io.IOException;
-
 import exploration.CustomLayer;
 import firebrigade.FireBrigadeTeam;
 import firebrigade.FireStation;
+import ambulance.AmbulanceCentre;
+import ambulance.AmbulanceTeamAgent;
 import navigation_emil.GBSViewer;
+
 
 import rescuecore2.components.ComponentLauncher;
 import rescuecore2.components.TCPComponentLauncher;
@@ -105,6 +107,7 @@ public final class LaunchSampleAgents {
             }
         }
         catch (ComponentConnectionException e) {
+        	System.out.println("failed connecting fire"+ e.getMessage());
             Logger.info("failed: " + e.getMessage());
         }
         try {
@@ -115,36 +118,43 @@ public final class LaunchSampleAgents {
             }
         }
         catch (ComponentConnectionException e) {
+        	System.out.println("failed connecting police"+ e.getMessage());
             Logger.info("failed: " + e.getMessage());
         }
         try {
             while (at-- != 0) {
                 Logger.info("Connecting ambulance team " + (i++) + "...");
-                launcher.connect(new SampleAmbulanceTeam());
+                System.out.println("Ambulance team connected");
+                launcher.connect(new AmbulanceTeamAgent());
                 Logger.info("success");
             }
         }
         catch (ComponentConnectionException e) {
+        	System.out.println("failed connecting ambulance"+ e.getMessage());
+            Logger.info("failed: " + e.getMessage());
+        }
+        try {
+            while (true) {
+                Logger.info("Connecting centre " + (i++) + "...");
+                launcher.connect(new AmbulanceCentre());
+                System.out.println("Ambulance centre connected");
+                Logger.info("success");
+            }
+        }
+        catch (ComponentConnectionException e) {
+        	System.out.println("failed connecting center"+ e.getMessage());
             Logger.info("failed: " + e.getMessage());
         }
         try {
             while (true) {
                 Logger.info("Connecting centre " + (i++) + "...");
                 launcher.connect(new SampleCentre());
+                System.out.println("Sample centre connected");
                 Logger.info("success");
             }
         }
         catch (ComponentConnectionException e) {
-            Logger.info("failed: " + e.getMessage());
-        }
-        try {
-            while (true) {
-                Logger.info("Connecting dummy agent " + (i++) + "...");
-                launcher.connect(new DummyAgent());
-                Logger.info("success");
-            }
-        }
-        catch (ComponentConnectionException e) {
+        	System.out.println("Sample failed connecting"+ e.getMessage());
             Logger.info("failed: " + e.getMessage());
         }/*
         try {
