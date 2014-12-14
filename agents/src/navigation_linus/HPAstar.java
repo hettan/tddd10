@@ -285,4 +285,11 @@ public class HPAstar extends StandardViewer implements SearchAlgorithm{
 		}
 		return returnArray;
 	}
+
+	@Override
+	public List<EntityID> getRemainingPath(List<EntityID> path,
+			EntityID currentArea) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
