@@ -166,7 +166,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 						//System.out.println("Ambulance unload and send position");
 						sendSpeak(time, 2, msg1.getBytes("UTF-8"));
 					} catch (java.io.UnsupportedEncodingException uee) {
-						Logger.error(uee.getMessage());
+						//Logger.error(uee.getMessage());
 					}
 					return;
 				}
@@ -214,7 +214,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 									.getID(), goal);
 							sendMove(time, path);
 							//System.out.println("Moving to an agent");
-							Logger.error("Moving to an agent");
+							//Logger.error("Moving to an agent");
 							currentTask = AmbulanceTeamTasks.MOVING_TO_HUMAN;
 							//targetHuman = goal;
 						}
@@ -231,7 +231,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 									.getID(), goal);
 							sendMove(time, path);
 							//System.out.println("Moving to a civilian");
-							Logger.error("Moving to a civilian");
+							//Logger.error("Moving to a civilian");
 							currentTask = AmbulanceTeamTasks.MOVING_TO_HUMAN;
 							//targetHuman = goal;
 						}
@@ -296,7 +296,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 			Logger.debug("Send my position on channel 1 " + msg3);
 			sendSpeak(time, 2, msg3.getBytes("UTF-8"));
 		} catch (java.io.UnsupportedEncodingException uee) {
-			Logger.error(uee.getMessage());
+			//Logger.error(uee.getMessage());
 		}
 		
 		List<EntityID> path = explore();

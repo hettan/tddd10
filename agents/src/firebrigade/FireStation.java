@@ -42,6 +42,8 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 	private List<FireArea> unHandledFires = new ArrayList<FireArea>();
 	private List<FireBrigadeAgent> agents = new ArrayList<FireBrigadeAgent>();
 	private Map<FireArea, EntityID> fireBrigadeForArea = new HashMap<FireArea, EntityID>();
+	private List<Integer> areaBuildingsToSend = new ArrayList<Integer>();
+	private List<Integer> checkBuildings = new ArrayList<Integer>();
 	private List<FireArea> fireAreas;
 	private FireKnowledgeStore fireKnowledgeStore;
 	private DumbRREFPrediction dumbRREFPrediction;
@@ -133,7 +135,11 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 					//System.out.println("In FireSeen");
 					int seenFireID = Integer.parseInt(parts[1]);
 					((Building)(model.getEntity(new EntityID(seenFireID)))).setTemperature(Integer.parseInt(parts[2]));
-					fireKnowledgeStore.foundFire(seenFireID);
+					checkBuildings = fireKnowledgeStore.getBurningBuildings();
+					if(!checkBuildings.contains(seenFireID))
+					{	
+						fireKnowledgeStore.foundFire(seenFireID);
+					}
 					//System.out.println(seenFireID);
 					break;
 				}
@@ -152,9 +158,10 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 		{
 			Map<FireBrigade, Double> costForAgent = new HashMap<FireBrigade, Double>();
 			FireArea area = fireAreas.get(i);
-			if(!handledFires.contains(area))
-			{
-				int fireBrigadesNeeded = dumbRREFPrediction.getPrediction(area);
+			//if(!handledFires.contains(area))
+			//{
+				//int fireBrigadesNeeded = dumbRREFPrediction.getPrediction(area);
+				int fireBrigadesNeeded = 4;
 				for (FireBrigadeAgent agent : agents) 
 				{
 					EntityID agent2 = agent.getID();
@@ -197,22 +204,29 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 					{
 						for(int j = 0; j < areaAgents.size(); j++)
 						{
+							System.out.println("Im here");
 							fireBrigadeForArea.put(area,areaAgent);
 							handledFires.add(area);
-							String msg = "mission " + String.valueOf(areaAgent.getValue()) + " " + String.valueOf(fireAreas.get(i));
-							Logger.debug("Send extinguish Fires " + msg);
-							//sendSpeak(time, 2, msg.getBytes());
-							Message message = new Message();
-							message.sender = getID();
-							message.destGroup = CommunicationGroup.FIREBRIGADE;
-							message.time = time;
-							message.type = CommunicationType.REQUEST;
-							message.data = msg;
-							communication.sendMessage(message);
+							areaBuildingsToSend =  area.getBuildingsInArea();
+							for( Integer buildingToSend : areaBuildingsToSend)
+							{
+								EntityID buildingEntity2 = new EntityID(buildingToSend);
+								Building building = (Building) model.getEntity(buildingEntity2);
+								String msg = "mission " + String.valueOf(areaAgent.getValue()) + " " + String.valueOf(buildingToSend) +" " + String.valueOf(building.getTemperature());
+								Logger.debug("Send extinguish Fires " + msg);
+								//sendSpeak(time, 2, msg.getBytes());
+								Message message = new Message();
+								message.sender = getID();
+								message.destGroup = CommunicationGroup.FIREBRIGADE;
+								message.time = time;
+								message.type = CommunicationType.REQUEST;
+								message.data = msg;
+								communication.sendMessage(message);
+							}
 						}
 					}
 				}
-			}
+			//}
 		}
 	}
 	

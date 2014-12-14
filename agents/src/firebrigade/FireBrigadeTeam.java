@@ -9,6 +9,7 @@ import rescuecore2.log.Logger;
 import rescuecore2.messages.Command;
 import rescuecore2.standard.entities.Building;
 import rescuecore2.standard.entities.FireBrigade;
+import rescuecore2.standard.entities.Hydrant;
 import rescuecore2.standard.entities.Refuge;
 import rescuecore2.standard.entities.StandardEntity;
 import rescuecore2.standard.entities.StandardEntityURN;
@@ -39,6 +40,7 @@ public class FireBrigadeTeam extends ExplorationAgent<FireBrigade> {
     private int maxWater;
 	private int counter = 0;
     private int maxPower;
+    
     @Override
 	protected void postConnect() {
 		super.postConnect();
@@ -139,16 +141,21 @@ public class FireBrigadeTeam extends ExplorationAgent<FireBrigade> {
 			//{
 				//Agent and fireArea he has to handle
 				agent = Integer.parseInt(parts[0]);
-				fireAreaID = Integer.parseInt(parts[1]);
-				List<FireArea> fireAreas = fireKnowledgeStore.getFireAreas();
-				fireArea = fireAreas.get(fireAreaID);	
+				int buildingID = Integer.parseInt(parts[1]);
+				//List<FireArea> fireAreas = fireKnowledgeStore.getFireAreas();
+				//fireArea = fireAreas.get(fireAreaID);	
+				int temperatureBuilding =  Integer.parseInt(parts[2]);
+				((Building)(model.getEntity(new EntityID(temperatureBuilding)))).setTemperature(Integer.parseInt(parts[2]));
+				if (me.getID().getValue() == agent) {
+					internToHandleFires.add(buildingID);
+				}
 				break;
 			//}
 		}
 		
-			if (me.getID().getValue() == agent) {
-				internToHandleFires = fireArea.getBuildingsInArea();
-			}
+			//if (me.getID().getValue() == agent) {
+			//	internToHandleFires = fireArea.getBuildingsInArea();
+			//}
 
 			// Refilling Water
 			if (me.getWater() < maxWater && location() instanceof Refuge) {
@@ -168,7 +175,7 @@ public class FireBrigadeTeam extends ExplorationAgent<FireBrigade> {
 				}
 			}
 			
-			int fieryness = 999999999;
+			int temperature = 999999999;
 			//Search for building to extinguish
 			if (internToHandleFires.size() != 0) 
 			{
@@ -177,11 +184,11 @@ public class FireBrigadeTeam extends ExplorationAgent<FireBrigade> {
 					int burningBuildingID = internToHandleFires.get(i);
 					EntityID burningBuildingEID = new EntityID(burningBuildingID);
 					Building burningBuilding = (Building) model.getEntity(burningBuildingEID);
-					int fierynessTemp = burningBuilding.getFieryness();
-					if (fierynessTemp == 0) 
+					int temperatureTemp = burningBuilding.getTemperature();
+					if (temperatureTemp == 0) 
 					{
 						internToHandleFires.remove(i);
-						fierynessTemp = 999999999;
+						temperatureTemp = 999999999;
 						//SEND EXTINGUISHED FIRE
 						
 						
@@ -199,9 +206,9 @@ public class FireBrigadeTeam extends ExplorationAgent<FireBrigade> {
 
 					}
 					
-					if (fierynessTemp <= fieryness) 
+					if (temperatureTemp <= temperature) 
 					{
-						fieryness = fierynessTemp;
+						temperature = temperatureTemp;
 						targetBuilding = burningBuildingEID;
 					}
 				}
@@ -216,7 +223,6 @@ public class FireBrigadeTeam extends ExplorationAgent<FireBrigade> {
 					}
 					else
 					{
-						//TODO new Search
 						List<EntityID> path = planPathToFire(targetBuilding);
 						if (path != null)
 						{
@@ -239,7 +245,6 @@ public class FireBrigadeTeam extends ExplorationAgent<FireBrigade> {
 					}
 				}
 			}
-			// TODO Explore
 			List<EntityID> path;
 			path = explore();
             sendMove(time, path);

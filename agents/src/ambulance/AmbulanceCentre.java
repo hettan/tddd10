@@ -107,7 +107,7 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre> {
 				}
 
 			} catch (UnsupportedEncodingException ex) {
-				Logger.error(ex.getMessage());
+				//Logger.error(ex.getMessage());
 			}
 		}		
 //		if(agentsburied !=null) {
