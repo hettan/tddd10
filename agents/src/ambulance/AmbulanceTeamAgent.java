@@ -23,7 +23,7 @@ import sample.AbstractSampleAgent;
 import sample.DistanceSorter;
 import rescuecore2.standard.messages.AKSpeak;
 
-public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam> {
+public class AmbulanceTeamAgent extends ExplorationAgent<AmbulanceTeam> {
 	
 	/** The target human to rescue or to load */
 	protected Human targetHuman ;
@@ -300,8 +300,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 			Logger.error(uee.getMessage());
 		}
 		
-		List<EntityID> path = search.performSearch(me().getPosition(),
-				unexploredBuildings);
+		List<EntityID> path = explore();
 		if (path != null) {
 			Logger.info("Searching buildings");
 			System.out.println("Search building");
