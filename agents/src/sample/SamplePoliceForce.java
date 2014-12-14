@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 
+import exploration.ExplorationAgent;
+
 import rescuecore2.worldmodel.EntityID;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.messages.Command;
@@ -24,7 +26,7 @@ import rescuecore2.standard.entities.Area;
 /**
    A sample police force agent.
  */
-public class SamplePoliceForce extends AbstractSampleAgent<PoliceForce> {
+public class SamplePoliceForce extends ExplorationAgent<PoliceForce> {
     private static final String DISTANCE_KEY = "clear.repair.distance";
 
     private int distance;
@@ -86,7 +88,7 @@ public class SamplePoliceForce extends AbstractSampleAgent<PoliceForce> {
         }
         Logger.debug("Couldn't plan a path to a blocked road");
         Logger.info("Moving randomly");
-        sendMove(time, randomWalk());
+        sendMove(time, explore());
     }
 
     @Override

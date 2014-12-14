@@ -49,7 +49,7 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre> {
 	protected void think(int time, ChangeSet changed, Collection<Command> heard) {
 			// Subscribe to channel 1
 			sendSubscribe(time, 2);
-		System.out.println("Ambulance Center");
+		//System.out.println("Ambulance Center");
 		if (frontier == null) {
 			frontier = new HashSet<EntityID>();
 			for (StandardEntity entity : model
@@ -64,7 +64,7 @@ StandardAgent<rescuecore2.standard.entities.AmbulanceCentre> {
 				byte[] content = ((AKSpeak) next).getContent();
 				String txt = new String(content, "UTF-8");
 				Logger.error("Heard " + next + txt);
-				System.out.println("Heard" + next + txt);
+				//System.out.println("Heard" + next + txt);
 				String[] parts = txt.split(" ");
 				if (parts.length == 0) {
 					Logger.warn("Ignoring " + txt);

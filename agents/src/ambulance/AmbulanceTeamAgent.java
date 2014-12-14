@@ -50,7 +50,6 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 				StandardEntityURN.BUILDING);
 		unexploredBuildings = new HashSet<EntityID>(buildingIDs);
 		map=TypeMap.KOBE;
-		System.out.println("Initialization !!!!!!!!!!");
 		currentTask=AmbulanceTeamTasks.NO_TASK;
 	}
 	
@@ -58,7 +57,6 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 	protected void initialize() {
 		super.initialize();
 		map=TypeMap.KOBE;
-		System.out.println("Initialization !!!!!!!!!!");
 		currentTask=AmbulanceTeamTasks.NO_TASK;
 	}
 
@@ -79,7 +77,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 				if(building.isOnFire() && !internSeenFires.contains(next)) {
 					internSeenFires.add(next);
 					//TODO speak add to fireArea
-					System.out.println("Send fire location to firebrigade");
+					//System.out.println("Send fire location to firebrigade");
 				}
 			}
 		}
@@ -94,7 +92,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 					}
 					if ((next instanceof Civilian) && (next.getDamage()>0 && next.getBuriedness() == 0)
 							&& !(location() instanceof Refuge)) {
-						System.out.println("Ambulance see a civilian in danger !!");
+						//System.out.println("Ambulance see a civilian in danger !!");
 						internSeenCivilian.add(next.getID());
 						boolean foundSomeone = someoneInSameBuilding();
 						if(foundSomeone) {
@@ -118,14 +116,14 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 		if(me().getBuriedness()>0) {
 			//todo send buriedAgentMessage
 			String msg2 = "buried " + String.valueOf(me().getPosition().getValue());
-			System.out.println("Ambulance is buried and need rescue !");
+			//System.out.println("Ambulance is buried and need rescue !");
 			try {
 				sendSpeak(time, 2, msg2.getBytes("UTF-8"));
 			} catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			System.out.println("Ambulance is buried and need rescue !");
+			//System.out.println("Ambulance is buried and need rescue !");
 			currentTask = AmbulanceTeamTasks.BURIED;
 			return;
 		}
@@ -135,7 +133,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 			List<EntityID> path = search.performSearch(me()
 					.getPosition(), refugeIDs);
 				Logger.info("Moving to refuge");
-				System.out.println("Ambulance move to refuge because damage");
+				//System.out.println("Ambulance move to refuge because damage");
 				sendMove(time, path);
 				currentTask = AmbulanceTeamTasks.MOVE_TO_REFUGE;
 				return;
@@ -147,7 +145,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 	
 		if (someoneOnBoard()) {
 			//human is dead ?
-			System.out.println("Transporting civilians to refuge");
+			//System.out.println("Transporting civilians to refuge");
 			if (targetHuman.getHP() == 0){
 				sendUnload(time);
 				targetHuman = null;
@@ -165,7 +163,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 						String msg1 = "NO_TASK "
 								+ String.valueOf(me().getPosition().getValue());
 						Logger.debug("Send my position on channel 1 " + msg1);
-						System.out.println("Ambulance unload and send position");
+						//System.out.println("Ambulance unload and send position");
 						sendSpeak(time, 2, msg1.getBytes("UTF-8"));
 					} catch (java.io.UnsupportedEncodingException uee) {
 						Logger.error(uee.getMessage());
@@ -179,7 +177,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 							.getPosition(), refugeIDs);
 					if (path != null) {
 						Logger.info("Moving to refuge" + targetHuman);
-						System.out.println("Ambulance move to refuge");
+						//System.out.println("Ambulance move to refuge");
 						sendMove(time, path);
 						currentTask = AmbulanceTeamTasks.MOVE_TO_REFUGE;
 						return;
@@ -215,7 +213,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 							List<EntityID> path = search.performSearch(location()
 									.getID(), goal);
 							sendMove(time, path);
-							System.out.println("Moving to an agent");
+							//System.out.println("Moving to an agent");
 							Logger.error("Moving to an agent");
 							currentTask = AmbulanceTeamTasks.MOVING_TO_HUMAN;
 							//targetHuman = goal;
@@ -232,7 +230,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 							List<EntityID> path = search.performSearch(location()
 									.getID(), goal);
 							sendMove(time, path);
-							System.out.println("Moving to a civilian");
+							//System.out.println("Moving to a civilian");
 							Logger.error("Moving to a civilian");
 							currentTask = AmbulanceTeamTasks.MOVING_TO_HUMAN;
 							//targetHuman = goal;
@@ -263,7 +261,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 					// Load
 					Logger.info("Loading " + next);
 					sendLoad(time, next.getID());
-					System.out.println("Ambulance load a civilian");
+					//System.out.println("Ambulance load a civilian");
 					currentTask = AmbulanceTeamTasks.LOADING;
 					targetHuman = next;
 					return;
@@ -272,7 +270,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 					// Rescue
 					Logger.info("Rescueing " + next);
 					sendRescue(time, next.getID());
-					System.out.println("Ambulance rescue a civilian");
+					//System.out.println("Ambulance rescue a civilian");
 					currentTask = AmbulanceTeamTasks.RESCUING;
 					targetHuman = next;
 					return;
@@ -284,14 +282,14 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 				if (path != null) {
 					Logger.info("Moving to target");
 					sendMove(time, path);
-					System.out.println("Ambulance move to civilian");
+					//System.out.println("Ambulance move to civilian");
 					currentTask = AmbulanceTeamTasks.MOVING_TO_HUMAN;
 					targetHuman = next;
 					return;
 				}
 			}
 		}
-		System.out.println("Ambulance have no task and send position");
+		//System.out.println("Ambulance have no task and send position");
 		try {
 			String msg3 = "NO_TASK "
 					+ String.valueOf(me().getPosition().getValue());
@@ -304,7 +302,7 @@ public class AmbulanceTeamAgent extends AbstractAmbulanceTeamAgent<AmbulanceTeam
 		List<EntityID> path = explore();
 		if (path != null) {
 			Logger.info("Searching buildings");
-			System.out.println("Search building");
+			//System.out.println("Search building");
 			sendMove(time, path);
 			currentTask = AmbulanceTeamTasks.NO_TASK;
 			targetHuman = null;
