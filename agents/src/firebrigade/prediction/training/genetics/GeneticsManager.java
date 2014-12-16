@@ -10,7 +10,7 @@ import firebrigade.prediction.training.TrainingPersistor;
 public class GeneticsManager {
 	public static Random random = new Random();
 	private double crossover_rate = 0.7;
-	private double mutation_rate = 0.05;
+	private double mutation_rate = 0.1;
 	
 	/*
 	 * Takes a generation, evolves it, and creates a new equally large generation.

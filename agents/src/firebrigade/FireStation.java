@@ -17,8 +17,9 @@ import communication.CommunicationFactory;
 import communication.CommunicationGroup;
 import communication.CommunicationType;
 import communication.Message;
-
 import firebrigade.prediction.DumbRREFPrediction;
+import firebrigade.prediction.NeuralNetworkPrediction;
+import firebrigade.prediction.RREFPrediction;
 import rescuecore2.standard.messages.AKSpeak;
 import rescuecore2.worldmodel.ChangeSet;
 import rescuecore2.worldmodel.EntityID;
@@ -46,7 +47,7 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 	private List<Integer> checkBuildings = new ArrayList<Integer>();
 	private List<FireArea> fireAreas;
 	private FireKnowledgeStore fireKnowledgeStore;
-	private DumbRREFPrediction dumbRREFPrediction;
+	private RREFPrediction dumbRREFPrediction;
 	boolean busy;
 	private FireBrigadeAgent fireBrigadeAgent;
 	private boolean _isInitialized = false;
@@ -65,7 +66,15 @@ StandardAgent<rescuecore2.standard.entities.FireStation>
 			agents.add(agentFBA);
 		}
 		fireKnowledgeStore = new FireKnowledgeStoreImpl(model);
-		dumbRREFPrediction = new DumbRREFPrediction();
+		//dumbRREFPrediction = new DumbRREFPrediction();
+		try
+		{
+			dumbRREFPrediction = new NeuralNetworkPrediction(model);
+		}
+		catch(Exception e)
+		{
+			dumbRREFPrediction = new DumbRREFPrediction();
+		}
 	}
 	
 	@Override

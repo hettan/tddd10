@@ -18,7 +18,7 @@ public class LaunchTrainingConductor {
 		}
 		
 		//Run conductors training.
-		for(int i = 0; i < 3; i++)
+		for(int i = 0; i < 1; i++)
 			conductor.runGeneration();
 		
 		//Removes all temporary files created for the training.

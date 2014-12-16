@@ -1,5 +1,8 @@
 package firebrigade.prediction;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import rescuecore2.standard.entities.Building;
@@ -28,6 +31,20 @@ public class NeuralNetworkPrediction implements RREFPrediction {
 		{
 			//load from scenario chromosome
 			_neuralNetwork.load(EnvironmentPaths.NEURAL_NETWORK_SCENARIO);
+
+    		try {
+            	File _file = new File("loaded_nn.txt");
+            	if(!_file.exists())
+            		_file.createNewFile();
+                FileWriter fw = new FileWriter(_file.getAbsoluteFile());
+    			BufferedWriter bw = new BufferedWriter(fw);
+    			bw.write("Hi!");
+    			bw.close();
+    		} catch (IOException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		}
+    		
 		}
 		else
 		{
@@ -37,6 +54,13 @@ public class NeuralNetworkPrediction implements RREFPrediction {
 		
 		if(!_neuralNetwork.isLoaded()) //Failed to load. Throw exception.
 		{
+        	File _file = new File("failed_to_load_nn.txt");
+        	if(!_file.exists())
+        		_file.createNewFile();
+            FileWriter fw = new FileWriter(_file.getAbsoluteFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write("Hi!");
+			bw.close();
 			if(IS_TRAINING)
 				throw new IOException("Failed to load NN from: " + EnvironmentPaths.NEURAL_NETWORK_SCENARIO);
 			throw new IOException("Failed to load NN from file: " + EnvironmentPaths.NEURAL_NETWORK_TRAINED);

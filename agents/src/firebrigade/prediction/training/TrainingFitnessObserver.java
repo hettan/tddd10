@@ -30,18 +30,26 @@ public class TrainingFitnessObserver extends StandardViewer {
     protected void postConnect() {
         super.postConnect();
         System.out.println("Fitness observer connected");
-        
+        Collection<StandardEntity> buildings = model.getEntitiesOfType(StandardEntityURN.BUILDING);
+    	maxTotalHealth = buildings.size() * 8;
+//    	for(StandardEntity b : buildings)
+//    	{
+//    		Building building = (Building)b;
+//    		if(building != null)
+//    		{
+//    		
+//    		}
+//    	}
     }
-	
+
+    double maxTotalHealth;
 	@Override
     protected void handleTimestep(final KVTimestep t) {
         super.handleTimestep(t);
-        System.out.println("Calculated fitness");
-        this.model.merge(t.getChangeSet());
         double fitness = 0.0;
-        if(t.getTime() == 10){
+        if(t.getTime() == 300){
         	Collection<StandardEntity> buildings = model.getEntitiesOfType(StandardEntityURN.BUILDING);
-        	double maxTotalHealth = buildings.size() * 100;
+        	//double maxTotalHealth = buildings.size() * 100;
         	double totalDamage = 0.0;
         	for(StandardEntity b : buildings)
         	{
@@ -55,12 +63,13 @@ public class TrainingFitnessObserver extends StandardViewer {
         			 * 50 = half collapsed
         			 * 100 = fullyCollapsed
         			 */
-        			totalDamage += building.getBrokenness();
+        			totalDamage += building.getFieryness();
         		}
         	}
         	
         	double percentageSaved = (maxTotalHealth - totalDamage) / maxTotalHealth;
         	percentageSaved *= 100; //Scale it so it is between 0-100.
+            System.out.println("Calculated fitness: " + totalDamage + "/" + maxTotalHealth + "=" + percentageSaved);
 
 //        	String extra  = "";
 //        	try
@@ -87,7 +96,7 @@ public class TrainingFitnessObserver extends StandardViewer {
 //        	{
 //        		
 //        	}
-        	
+//        	
         	
     		try {
             	File _file = new File("fitnessObserver.txt");

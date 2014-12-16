@@ -22,6 +22,24 @@
   <scenario:hydrant scenario:location="7746"/>
   <scenario:hydrant scenario:location="6252"/>
   <scenario:hydrant scenario:location="4245"/>
-  <scenario:firebrigade scenario:location="15045"/>
-  <scenario:firebrigade scenario:location="22713"/>
+  <scenario:firebrigade scenario:location="352"/>
+  <scenario:firebrigade scenario:location="352"/>
+  <scenario:firebrigade scenario:location="352"/>
+  <scenario:firebrigade scenario:location="352"/>
+  <scenario:firebrigade scenario:location="352"/>
+  <scenario:firebrigade scenario:location="1976"/>
+  <scenario:firebrigade scenario:location="1976"/>
+  <scenario:firebrigade scenario:location="1976"/>
+  <scenario:firebrigade scenario:location="1976"/>
+  <scenario:firebrigade scenario:location="1976"/>
+  <scenario:firebrigade scenario:location="31204"/>
+  <scenario:firebrigade scenario:location="31204"/>
+  <scenario:firebrigade scenario:location="31204"/>
+  <scenario:firebrigade scenario:location="31204"/>
+  <scenario:firebrigade scenario:location="31204"/>
+  <scenario:firebrigade scenario:location="1782"/>
+  <scenario:firebrigade scenario:location="1782"/>
+  <scenario:firebrigade scenario:location="1782"/>
+  <scenario:firebrigade scenario:location="1782"/>
+  <scenario:firebrigade scenario:location="1782"/>
 </scenario:scenario>
